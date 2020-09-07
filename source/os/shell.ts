@@ -84,6 +84,12 @@ module TSOS {
                                   "whereami",
                                   "- Displays current location.");
             this.commandList[this.commandList.length] = sc;
+			
+			// status <string>
+			sc = new ShellCommand(this.shellStatus,
+								  "status",
+								  "<string> - Sets the current status.");
+			this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -325,6 +331,16 @@ module TSOS {
 			_StdOut.putText("The current location identifies as...");
 			_StdOut.advanceLine();
 			_StdOut.putText("First Low Orbit Station: Rhadamanthus.");
+		}
+		
+		public shellStatus(args: string[]) {
+			if (args.length > 0) {
+				document.getElementById("statusIn").innerHTML = args[0];
+			}
+			else {
+                _StdOut.putText("Usage: status <string>  Please supply a string.");
+			}
+		}
 
     }
 }

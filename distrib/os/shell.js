@@ -51,6 +51,9 @@ var TSOS;
             // whereami
             sc = new TSOS.ShellCommand(this.shellWhereami, "whereami", "- Displays current location.");
             this.commandList[this.commandList.length] = sc;
+            // status <string>
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Sets the current status.");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -278,6 +281,14 @@ var TSOS;
             _StdOut.putText("The current location identifies as...");
             _StdOut.advanceLine();
             _StdOut.putText("First Low Orbit Station: Rhadamanthus.");
+        }
+        shellStatus(args) {
+            if (args.length > 0) {
+                document.getElementById("statusIn").innerHTML = args[0];
+            }
+            else {
+                _StdOut.putText("Usage: status <string>  Please supply a string.");
+            }
         }
     }
     TSOS.Shell = Shell;
