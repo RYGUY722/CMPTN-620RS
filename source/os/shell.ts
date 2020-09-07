@@ -73,6 +73,18 @@ module TSOS {
                                   "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
 
+            // date
+            sc = new ShellCommand(this.shellDate,
+                                  "date",
+                                  "- Displays the current date and time.");
+            this.commandList[this.commandList.length] = sc;
+
+            // whereami
+            sc = new ShellCommand(this.shellWhereami,
+                                  "whereami",
+                                  "- Displays current location.");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -231,10 +243,30 @@ module TSOS {
             if (args.length > 0) {
                 var topic = args[0];
                 switch (topic) {
+					case "ver":
+						_StdOut.putText("Ver shows the current OntOS version.");
+						break;
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+					case "shutdown":
+						_StdOut.putText("Shutdown ends the OS process without clearing the screen.");
+						break;
+					case "cls":
+						_StdOut.putText("Cls wipes all that mess you made off the screen.");
+						break;
+					case "man":
+						_StdOut.putText("Man displays a manual for the command that comes afterward.");
+						break;
+					case "trace":
+						_StdOut.putText("Trace toggles the OS tracing available in the Host Log.");
+						break;
+					case "rot13":
+						_StdOut.putText("Rot13 takes the following text and shifts each letter by 13.");
+						break;
+					case "prompt":
+						_StdOut.putText("Prompt sets the opening text of each line to the given text.");
+						break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -283,6 +315,16 @@ module TSOS {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
         }
+		
+		public shellDate(args: string[]) {
+			var d = new Date();
+			_StdOut.putText("The current date is "+d+".");
+		}
+		
+		public shellWhereami(args: string[]) {
+			_StdOut.putText("The current location identifies as...");
+			_StdOut.advanceLine();
+			_StdOut.putText("First Low Orbit Station: Rhadamanthus.");
 
     }
 }
