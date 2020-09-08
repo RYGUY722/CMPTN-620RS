@@ -351,7 +351,7 @@ module TSOS {
 		//Currently only checks to see that the code is valid. TODO: Actually load code
 		shellLoad(args: string[]) { 
 			//Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
-			var a = document.getElementById("taProgramInput").value; 
+			var a = (<HTMLInputElement> document.getElementById("taProgramInput")).value; 
 			a = a.replace(/\s/g,''); //The integer cannot store spaces, so we remove them from the original string here.
 			
 			//There are 2 checks to perform before checking if "a" is a valid hexadecimal string

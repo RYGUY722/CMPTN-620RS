@@ -79,8 +79,12 @@ var TSOS;
             ctx.restore();
             return total;
         }
+        static erase(ctx, x, y, w, h) {
+            ctx.clearRect(x, y, w, h);
+        }
         static enable(ctx) {
             ctx.drawText = function (font, size, x, y, text) { return CanvasTextFunctions.draw(ctx, font, size, x, y, text); };
+            ctx.eraseText = function (x, y, width, height) { return CanvasTextFunctions.erase(ctx, x, y, width, height); };
             ctx.measureText = function (font, size, text) { return CanvasTextFunctions.measure(font, size, text); };
             ctx.fontAscent = function (font, size) { return CanvasTextFunctions.ascent(font, size); };
             ctx.fontDescent = function (font, size) { return CanvasTextFunctions.descent(font, size); };
