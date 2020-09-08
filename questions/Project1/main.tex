@@ -1,0 +1,106 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT xxx
+% Fall 2020
+% Lab One
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+\usepackage{hyperref}
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+   \normalfont \normalsize 
+   \textsc{CMPT 424N - Fall 2020 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Project One  \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Ryan Sheffler \\ \normalsize Ryan.Sheffler1@Marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM ONE
+%----------------------------------------------------------------------------------------
+\section{Lab One}
+
+\subsection{}
+What are the advantages and disadvantages of using the same system call interface for manipulating both files and devices?
+
+By using both through the same interface, users are more easily able to create device drivers using the system call interface. More device drivers means that more devices are easily accessible. Later users will find it easier to manipulate the devices through the drivers and APIs, as everything the kernel manipulates is treated the same way. On the other hand, this can make it much more difficult for certain devices to access their "true potential." Using the same interface that is used for file manipulation may limit exactly what can be efficiently coded into a device driver.
+
+\subsection{}
+Would it be possible for the user to develop a new command interpreter using the system call interface provide by the operating system? How?
+
+The system call interface allows a user to start, manage, and end processes as well as manipulate files and how those processes interact with them, albeit indirectly. Though there is another layer between the user and the hardware (i.e., the user is interacting through another "safety net" line of code in the operating system), the user should still have the necessary amount of control over the system through the system call interface to code a new command interpreter on top of the already existing operating system.
+
+\pagebreak
+
+\section{Lab Two}
+
+\subsection{}
+How is your console like the ancient TTY subsystem in Unix as described on \href{https://www.linusakesson.net/programming/tty/}{Linus Akesson's website}?
+
+Just like the primitive TTY system, our operating system uses a simple extra layer of programming to manage it. Most of this code is simply run in $console.ts$, which handles primarily the drawing of elements to the canvas area, but also keeps track of a text buffer for the current line. This is how our operating system console provides the same simple text editing options he mentions under the \textsc{Line editing} section. In the future, this should also allow us to administratively manage or end processes, just as mentioned in the \textsc{Session management} section. Our keyboard driver also is capable of operating asynchronously, passively waiting on standby for a keypress, at which point it will throw up an interrupt signal to the kernel. Our kernel also uses a very similar method of flow control to what he mentions. This can be observer in real time by simply holding a key down. Since our "CPU" runs so slowly (at least by today's standards), it cannot keep up with the constantly spammed keypress and will lag behind. When you let go of the key, it will keep drawing that letter until it has emptied the buffer.
+
+\end{document}

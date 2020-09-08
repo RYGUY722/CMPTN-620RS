@@ -96,6 +96,12 @@ module TSOS {
 								  "load",
 								  "- Retrieves the user program and verifies it.");
 			this.commandList[this.commandList.length] = sc;
+			
+			// brick <string>
+			sc = new ShellCommand(this.shellBrick,
+								  "brick",
+								  "<string> - Triggers the fatal error response. Optional custom message.");
+			this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -378,6 +384,15 @@ module TSOS {
 					_StdOut.putText("The instruction set is invalid.");
 				}
 			}
+		}
+		
+		//Kill them all. Every last one of them.
+		shellBrick(args: string[]) {
+			var msg = "Manual";
+			if(args.length>0){
+				msg += ", " + args[0];
+			}
+			_Kernel.krnTrapError(msg);
 		}
 
     }
