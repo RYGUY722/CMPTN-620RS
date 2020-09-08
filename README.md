@@ -4,6 +4,10 @@ Each project has its own branch. After the project's completion, the changes are
 All lab questions can be found in the "questions" folder.  
 Project 1 branch: Project1.  
 
+**UPDATE, 9/8/2020 1:43 AM:** I just realized I wasn't referencing a specific issue number in my commits.... Oops... I can't edit them now, but they all definitely say what was added and which issue was addressed, just in words, not numbers. Will be including numbers in future commits.
+
+*Keeping the below information for easy future access.*
+
 2019 Browser-based Operating System in TypeScript
 =================================================
 
