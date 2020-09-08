@@ -187,7 +187,7 @@ module TSOS {
             return total;
         }
 		
-		public static erase(ctx, x, y, w, h) {
+		public static erase(ctx, x, y, w, h) { //Erase draws a clear rectangle at the target position of the set size. When drawn over a character, erases it.
 			ctx.clearRect(x, y, w, h);
 		}
 

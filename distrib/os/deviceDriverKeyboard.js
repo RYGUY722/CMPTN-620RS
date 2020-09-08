@@ -46,9 +46,171 @@ var TSOS;
                 (keyCode == 38) || // up
                 (keyCode == 40)) { // down
                 chr = String.fromCharCode(keyCode);
+                if (keyCode == 38) {
+                    chr = "up";
+                }
+                else if (keyCode == 40) {
+                    chr = "dn";
+                }
                 _KernelInputQueue.enqueue(chr);
             }
-            else if (((keyCode >= 48) && (keyCode <= 57))) { //Special characters (and digits)
+            else if (((keyCode >= 48) && (keyCode <= 57))) { // digits
+                chr = String.fromCharCode(keyCode);
+                if (isShifted) {
+                    switch (keyCode) {
+                        case 48: {
+                            chr = ')';
+                            break;
+                        }
+                        case 49: {
+                            chr = '!';
+                            break;
+                        }
+                        case 50: {
+                            chr = '@';
+                            break;
+                        }
+                        case 51: {
+                            chr = '#';
+                            break;
+                        }
+                        case 52: {
+                            chr = '$';
+                            break;
+                        }
+                        case 53: {
+                            chr = '%';
+                            break;
+                        }
+                        case 54: {
+                            chr = '^';
+                            break;
+                        }
+                        case 55: {
+                            chr = '&';
+                            break;
+                        }
+                        case 56: {
+                            chr = '*';
+                            break;
+                        }
+                        case 57: {
+                            chr = '(';
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                }
+                _KernelInputQueue.enqueue(chr);
+            }
+            //Special characters
+            else if (((keyCode >= 186) && (keyCode <= 192)) || // ;=,-./`
+                ((keyCode >= 219) && (keyCode <= 222))) { // [\]'
+                if (!isShifted) {
+                    switch (keyCode) {
+                        case 186: {
+                            chr = ';';
+                            break;
+                        }
+                        case 187: {
+                            chr = '=';
+                            break;
+                        }
+                        case 188: {
+                            chr = ',';
+                            break;
+                        }
+                        case 189: {
+                            chr = '-';
+                            break;
+                        }
+                        case 190: {
+                            chr = '.';
+                            break;
+                        }
+                        case 191: {
+                            chr = '/';
+                            break;
+                        }
+                        case 192: {
+                            chr = '`';
+                            break;
+                        }
+                        case 219: {
+                            chr = '[';
+                            break;
+                        }
+                        case 220: {
+                            chr = '\\';
+                            break;
+                        }
+                        case 221: {
+                            chr = ']';
+                            break;
+                        }
+                        case 222: {
+                            chr = '\'';
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                }
+                if (isShifted) {
+                    switch (keyCode) {
+                        case 186: {
+                            chr = ':';
+                            break;
+                        }
+                        case 187: {
+                            chr = '+';
+                            break;
+                        }
+                        case 188: {
+                            chr = '<';
+                            break;
+                        }
+                        case 189: {
+                            chr = '_';
+                            break;
+                        }
+                        case 190: {
+                            chr = '>';
+                            break;
+                        }
+                        case 191: {
+                            chr = '?';
+                            break;
+                        }
+                        case 192: {
+                            chr = '~';
+                            break;
+                        }
+                        case 219: {
+                            chr = '{';
+                            break;
+                        }
+                        case 220: {
+                            chr = '|';
+                            break;
+                        }
+                        case 221: {
+                            chr = '}';
+                            break;
+                        }
+                        case 222: {
+                            chr = '"';
+                            break;
+                        }
+                        default: {
+                            break;
+                        }
+                    }
+                }
+                _KernelInputQueue.enqueue(chr);
             }
         }
     }

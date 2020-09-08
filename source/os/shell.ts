@@ -338,7 +338,7 @@ module TSOS {
             }
         }
 
-        public shellPrompt(args: string[]) {
+        public shellPrompt(args: string[]) { //Allows the user to change the prompt from just ">"
             if (args.length > 0) {
                 _OsShell.promptStr = args[0];
             } else {
@@ -346,18 +346,18 @@ module TSOS {
             }
         }
 		
-		public shellDate(args: string[]) {
+		public shellDate(args: string[]) { //Gives the user the current date
 			var d = new Date();
 			_StdOut.putText("The current date is "+d+".");
 		}
 		
-		public shellWhereami(args: string[]) {
+		public shellWhereami(args: string[]) { //Prints a predefined message
 			_StdOut.putText("The current location identifies as...");
 			_StdOut.advanceLine();
 			_StdOut.putText("First Low Orbit Station: Rhadamanthus.");
 		}
 		
-		public shellStatus(args: string[]) {
+		public shellStatus(args: string[]) { //Allows the user to input a status to display at the top of the screen
 			if (args.length > 0) {
 				document.getElementById("statusIn").innerHTML = args[0];
 			}
@@ -399,7 +399,7 @@ module TSOS {
 		}
 		
 		//Kill them all. Every last one of them.
-		shellBrick(args: string[]) {
+		shellBrick(args: string[]) { //Forces a crash
 			var msg = "Manual";
 			if(args.length>0){
 				msg += ", " + args[0];
@@ -407,16 +407,16 @@ module TSOS {
 			_Kernel.krnTrapError(msg);
 		}
 		
-		shellRoll(args: string[]) {
-			if(args.length==0) {
+		shellRoll(args: string[]) { //Rolls a die of size args[0]
+			if(args.length==0) { //If there's no arguments, we can't roll the die.
 				_StdOut.putText("Usage: roll <integer>  Please supply an integer.");
 			}
 			else {
 				var i = parseInt(args[0]);
-				if(isNaN(i)) {
+				if(isNaN(i)) { //And we do need a valid integer
 					_StdOut.putText("Usage: roll <integer>  Please supply a valid integer.");
 				}
-				else {
+				else { //If we've got our size, generate a random number between 1 and it.
 					_StdOut.putText("Rolling d"+i);
 					_StdOut.advanceLine();
 					_StdOut.putText("Result: "+(Math.floor(Math.random() * Math.floor(i))+1));

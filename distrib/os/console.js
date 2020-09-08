@@ -57,7 +57,7 @@ var TSOS;
                         this.removeText(lastchr);
                     }
                 }
-                else if (chr === String.fromCharCode(38)) { //Up arrow
+                else if (chr === "up") { //Up arrow
                     if (this.histID <= 0) { //If we're as far back as we can recall, empty the buffer and set histID to -1
                         this.histID = -1;
                         this.removeText(this.buffer);
@@ -70,7 +70,7 @@ var TSOS;
                         this.putText(this.buffer);
                     }
                 }
-                else if (chr === String.fromCharCode(40)) { //Down arrow
+                else if (chr === "dn") { //Down arrow
                     if (this.histID >= this.inpHistory.length - 1) { //If we're as far forward as we can recall, empty the buffer and set histID to inpHistory.length
                         this.histID = this.inpHistory.length;
                         this.removeText(this.buffer);
@@ -141,11 +141,11 @@ var TSOS;
         removeText(text) {
             //This is a copy of the putText, but reversed
             if (text !== "") {
-                //Calculate the size of the letter
+                //Calculate the size of the letter(s)
                 var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                // Move the current X positionto the start of the previous character.
+                // Move the current X position to the start of the previous character(s).
                 this.currentXPosition = this.currentXPosition - offset;
-                // Draw a clear rectangle over the previous character. This method would leave a tiny black line below the erased characters, so I added an arbitrary amount to the rectangle height. In this environment, there will never be characters below the erased character.
+                // Draw a clear rectangle over the previous character(s). This method would leave a tiny black line below the erased characters, so I added an arbitrary amount to the rectangle height. In this environment, there will never be characters below the erased character.
                 _DrawingContext.eraseText(this.currentXPosition, (this.currentYPosition - this.currentFontSize), offset, (this.currentFontSize + 5));
             }
         }
@@ -156,16 +156,15 @@ var TSOS;
              * Font descent measures from the baseline to the lowest point in the font.
              * Font height margin is extra spacing between the lines.
              */
-            var yChange = _DefaultFontSize +
+            var yChange = _DefaultFontSize + //Calculate the amount the line needs to go down.
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
-            // TODO: Handle scrolling. (iProject 1)
-            if ((this.currentYPosition + yChange) > _Canvas.height) {
-                var savestate = _DrawingContext.getImageData(0, 0, _Canvas.height, _Canvas.width);
-                this.clearScreen();
-                _DrawingContext.putImageData(savestate, 0, -yChange);
+            if ((this.currentYPosition + yChange) > _Canvas.height) { //If the line would go outside of the canvas, 
+                var savestate = _DrawingContext.getImageData(0, 0, _Canvas.height, _Canvas.width); //Save the canvas as an image...
+                this.clearScreen(); //Clear the screen...
+                _DrawingContext.putImageData(savestate, 0, -yChange); //Then redraw the screen as far up as we would have had to shift downwards
             }
-            else {
+            else { //Or, if we would fit in the canvas, just draw the next line lower.
                 this.currentYPosition += yChange;
             }
         }

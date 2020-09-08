@@ -336,15 +336,15 @@ var TSOS;
             _Kernel.krnTrapError(msg);
         }
         shellRoll(args) {
-            if (args.length == 0) {
+            if (args.length == 0) { //If there's no arguments, we can't roll the die.
                 _StdOut.putText("Usage: roll <integer>  Please supply an integer.");
             }
             else {
                 var i = parseInt(args[0]);
-                if (isNaN(i)) {
+                if (isNaN(i)) { //And we do need a valid integer
                     _StdOut.putText("Usage: roll <integer>  Please supply a valid integer.");
                 }
-                else {
+                else { //If we've got our size, generate a random number between 1 and it.
                     _StdOut.putText("Rolling d" + i);
                     _StdOut.advanceLine();
                     _StdOut.putText("Result: " + (Math.floor(Math.random() * Math.floor(i)) + 1));
