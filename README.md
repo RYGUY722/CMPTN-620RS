@@ -1,3 +1,9 @@
+Ryan Sheffler's OntOS
+=====================
+Each project has its own branch. After the project's completion, the changes are merged back to the master branch and a new project branch is started.  
+All lab questions can be found in the "questions" folder.  
+Project 1 branch: Project1.  
+
 2019 Browser-based Operating System in TypeScript
 =================================================
 
