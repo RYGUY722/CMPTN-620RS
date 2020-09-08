@@ -90,6 +90,12 @@ module TSOS {
 								  "status",
 								  "<string> - Sets the current status.");
 			this.commandList[this.commandList.length] = sc;
+			
+			// load
+			sc = new ShellCommand(this.shellLoad,
+								  "load",
+								  "- Retrieves the user program and verifies it.");
+			this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -339,6 +345,38 @@ module TSOS {
 			}
 			else {
                 _StdOut.putText("Usage: status <string>  Please supply a string.");
+			}
+		}
+		
+		//Currently only checks to see that the code is valid. TODO: Actually load code
+		shellLoad(args: string[]) { 
+			//Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
+			var a = document.getElementById("taProgramInput").value; 
+			a = a.replace(/\s/g,''); //The integer cannot store spaces, so we remove them from the original string here.
+			
+			//There are 2 checks to perform before checking if "a" is a valid hexadecimal string
+			
+			if(a.length==0) { //If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
+				_StdOut.putText("Please enter an instruction set.");
+			}
+			
+			else if(a.length%2!=0) { //Hexadecimal opcodes come in pairs (00-FF), so the string length must be even.
+				_StdOut.putText("The instruction set is invalid.");
+			}
+			
+			else { //If the string passes the 2 prerequisites, check if it is valid hexadecimal.
+				var b = parseInt(a,16);
+				
+				while(a.charAt(0)=='0') { //If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
+					a=a.substring(1,a.length);
+				}
+				
+				if(a.toLowerCase()==b.toString(16)) {
+					_StdOut.putText("The instruction set is valid.");
+				}
+				else {
+					_StdOut.putText("The instruction set is invalid.");
+				}
 			}
 		}
 
