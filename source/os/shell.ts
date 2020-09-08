@@ -102,6 +102,18 @@ module TSOS {
 								  "brick",
 								  "<string> - Triggers the fatal error response. Optional custom message.");
 			this.commandList[this.commandList.length] = sc;
+			
+			// roll <integer>
+			sc = new ShellCommand(this.shellRoll,
+								  "roll",
+								  "<integer> - Rolls a die with the specified number of sides.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// kos-mos
+			sc = new ShellCommand(this.shellKos,
+								  "kosmos",
+								  "Generates a random number to see if you get Kos-mos in Xenoblade 2.");
+			this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -393,6 +405,37 @@ module TSOS {
 				msg += ", " + args[0];
 			}
 			_Kernel.krnTrapError(msg);
+		}
+		
+		shellRoll(args: string[]) {
+			if(args.length==0) {
+				_StdOut.putText("Usage: roll <integer>  Please supply an integer.");
+			}
+			else {
+				var i = parseInt(args[0]);
+				if(isNaN(i)) {
+					_StdOut.putText("Usage: roll <integer>  Please supply a valid integer.");
+				}
+				else {
+					_StdOut.putText("Rolling d"+i);
+					_StdOut.advanceLine();
+					_StdOut.putText("Result: "+(Math.floor(Math.random() * Math.floor(i))+1));
+				}
+			}
+		}
+		
+		shellKos(args: string[]){ //there is a .01% chance to get the character kos-mos every time you summon a character in xenoblade 2. please god just give me some luck
+			if(Math.random()<=.0001){
+				if(_SarcasticMode){ _StdOut.putText("HOLY FUCKING SHIT, GO BUY A LOTTERY TICKET"); }
+				else { _StdOut.putText("You did it, you got KOS-MOS!"); }
+			}
+			else {
+				_StdOut.putText("You did not get KOS-MOS");
+				if(_SarcasticMode) {
+					_StdOut.advanceLine();
+					_StdOut.putText("...Loser.");
+				}
+			}
 		}
 
     }
