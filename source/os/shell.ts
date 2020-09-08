@@ -112,7 +112,7 @@ module TSOS {
 			// kos-mos
 			sc = new ShellCommand(this.shellKos,
 								  "kosmos",
-								  "Generates a random number to see if you get Kos-mos in Xenoblade 2.");
+								  "- Generates a random number to see if you get Kos-mos in Xenoblade 2.");
 			this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs

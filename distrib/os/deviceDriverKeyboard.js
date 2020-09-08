@@ -39,15 +39,16 @@ var TSOS;
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
             }
-            else if (((keyCode >= 48) && (keyCode <= 57)) || // digits
-                (keyCode == 32) || // space
-                (keyCode == 13)) { // enter
+            else if ((keyCode == 32) || // Special action characters (space)
+                (keyCode == 13) || // enter
+                (keyCode == 8) || // backspace
+                (keyCode == 9) || // tab
+                (keyCode == 38) || // up
+                (keyCode == 40)) { // down
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }
-            else if (keyCode == 8) {
-                chr = String.fromCharCode(keyCode);
-                _KernelInputQueue.enqueue(chr);
+            else if (((keyCode >= 48) && (keyCode <= 57))) { //Special characters (and digits)
             }
         }
     }

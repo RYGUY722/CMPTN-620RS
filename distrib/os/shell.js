@@ -64,7 +64,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellRoll, "roll", "<integer> - Rolls a die with the specified number of sides.");
             this.commandList[this.commandList.length] = sc;
             // kos-mos
-            sc = new TSOS.ShellCommand(this.shellKos, "kosmos", "Generates a random number to see if you get Kos-mos in Xenoblade 2.");
+            sc = new TSOS.ShellCommand(this.shellKos, "kosmos", "- Generates a random number to see if you get Kos-mos in Xenoblade 2.");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
