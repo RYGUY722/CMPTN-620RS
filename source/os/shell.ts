@@ -73,6 +73,48 @@ module TSOS {
                                   "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
 
+            // date
+            sc = new ShellCommand(this.shellDate,
+                                  "date",
+                                  "- Displays the current date and time.");
+            this.commandList[this.commandList.length] = sc;
+
+            // whereami
+            sc = new ShellCommand(this.shellWhereami,
+                                  "whereami",
+                                  "- Displays current location.");
+            this.commandList[this.commandList.length] = sc;
+			
+			// status <string>
+			sc = new ShellCommand(this.shellStatus,
+								  "status",
+								  "<string> - Sets the current status.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// load
+			sc = new ShellCommand(this.shellLoad,
+								  "load",
+								  "- Retrieves the user program and verifies it.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// brick <string>
+			sc = new ShellCommand(this.shellBrick,
+								  "brick",
+								  "<string> - Triggers the fatal error response. Optional custom message.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// roll <integer>
+			sc = new ShellCommand(this.shellRoll,
+								  "roll",
+								  "<integer> - Rolls a die with the specified number of sides.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// kos-mos
+			sc = new ShellCommand(this.shellKos,
+								  "kosmos",
+								  "- Generates a random number to see if you get Kos-mos in Xenoblade 2.");
+			this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -231,10 +273,30 @@ module TSOS {
             if (args.length > 0) {
                 var topic = args[0];
                 switch (topic) {
+					case "ver":
+						_StdOut.putText("Ver shows the current OntOS version.");
+						break;
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+					case "shutdown":
+						_StdOut.putText("Shutdown ends the OS process without clearing the screen.");
+						break;
+					case "cls":
+						_StdOut.putText("Cls wipes all that mess you made off the screen.");
+						break;
+					case "man":
+						_StdOut.putText("Man displays a manual for the command that comes afterward.");
+						break;
+					case "trace":
+						_StdOut.putText("Trace toggles the OS tracing available in the Host Log.");
+						break;
+					case "rot13":
+						_StdOut.putText("Rot13 takes the following text and shifts each letter by 13.");
+						break;
+					case "prompt":
+						_StdOut.putText("Prompt sets the opening text of each line to the given text.");
+						break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -276,13 +338,105 @@ module TSOS {
             }
         }
 
-        public shellPrompt(args: string[]) {
+        public shellPrompt(args: string[]) { //Allows the user to change the prompt from just ">"
             if (args.length > 0) {
                 _OsShell.promptStr = args[0];
             } else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
         }
+		
+		public shellDate(args: string[]) { //Gives the user the current date
+			var d = new Date();
+			_StdOut.putText("The current date is "+d+".");
+		}
+		
+		public shellWhereami(args: string[]) { //Prints a predefined message
+			_StdOut.putText("The current location identifies as...");
+			_StdOut.advanceLine();
+			_StdOut.putText("First Low Orbit Station: Rhadamanthus.");
+		}
+		
+		public shellStatus(args: string[]) { //Allows the user to input a status to display at the top of the screen
+			if (args.length > 0) {
+				document.getElementById("statusIn").innerHTML = args[0];
+			}
+			else {
+                _StdOut.putText("Usage: status <string>  Please supply a string.");
+			}
+		}
+		
+		//Currently only checks to see that the code is valid. TODO: Actually load code
+		shellLoad(args: string[]) { 
+			//Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
+			var a = (<HTMLInputElement> document.getElementById("taProgramInput")).value; 
+			a = a.replace(/\s/g,''); //The integer cannot store spaces, so we remove them from the original string here.
+			
+			//There are 2 checks to perform before checking if "a" is a valid hexadecimal string
+			
+			if(a.length==0) { //If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
+				_StdOut.putText("Please enter an instruction set.");
+			}
+			
+			else if(a.length%2!=0) { //Hexadecimal opcodes come in pairs (00-FF), so the string length must be even.
+				_StdOut.putText("The instruction set is invalid.");
+			}
+			
+			else { //If the string passes the 2 prerequisites, check if it is valid hexadecimal.
+				var b = parseInt(a,16);
+				
+				while(a.charAt(0)=='0') { //If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
+					a=a.substring(1,a.length);
+				}
+				
+				if(a.toLowerCase()==b.toString(16)) {
+					_StdOut.putText("The instruction set is valid.");
+				}
+				else {
+					_StdOut.putText("The instruction set is invalid.");
+				}
+			}
+		}
+		
+		//Kill them all. Every last one of them.
+		shellBrick(args: string[]) { //Forces a crash
+			var msg = "Manual";
+			if(args.length>0){
+				msg += ", " + args[0];
+			}
+			_Kernel.krnTrapError(msg);
+		}
+		
+		shellRoll(args: string[]) { //Rolls a die of size args[0]
+			if(args.length==0) { //If there's no arguments, we can't roll the die.
+				_StdOut.putText("Usage: roll <integer>  Please supply an integer.");
+			}
+			else {
+				var i = parseInt(args[0]);
+				if(isNaN(i)) { //And we do need a valid integer
+					_StdOut.putText("Usage: roll <integer>  Please supply a valid integer.");
+				}
+				else { //If we've got our size, generate a random number between 1 and it.
+					_StdOut.putText("Rolling d"+i);
+					_StdOut.advanceLine();
+					_StdOut.putText("Result: "+(Math.floor(Math.random() * Math.floor(i))+1));
+				}
+			}
+		}
+		
+		shellKos(args: string[]){ //there is a .01% chance to get the character kos-mos every time you summon a character in xenoblade 2. please god just give me some luck
+			if(Math.random()<=.0001){
+				if(_SarcasticMode){ _StdOut.putText("HOLY FUCKING SHIT, GO BUY A LOTTERY TICKET"); }
+				else { _StdOut.putText("You did it, you got KOS-MOS!"); }
+			}
+			else {
+				_StdOut.putText("You did not get KOS-MOS");
+				if(_SarcasticMode) {
+					_StdOut.advanceLine();
+					_StdOut.putText("...Loser.");
+				}
+			}
+		}
 
     }
 }

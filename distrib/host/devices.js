@@ -28,6 +28,9 @@ var TSOS;
             _OSclock++;
             // Call the kernel clock pulse event handler.
             _Kernel.krnOnCPUClockPulse();
+            //Display/Update the date display.
+            var d = new Date();
+            document.getElementById("dateIn").innerHTML = d.toLocaleString();
         }
         //
         // Keyboard Interrupt, a HARDWARE Interrupt Request. (See pages 560-561 in our text book.)

@@ -149,7 +149,19 @@ var TSOS;
         }
         krnTrapError(msg) {
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
-            // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
+            _StdOut.resetXY(); //Draw over the entire canvas with a filled blue rectangle
+            var ctx = _DrawingContext;
+            ctx.beginPath();
+            ctx.fillStyle = "blue";
+            ctx.fillRect(0, 0, _Canvas.width, _Canvas.height);
+            ctx.stroke();
+            _StdOut.putText("A fatal error has occured."); //Place error text on top
+            _StdOut.advanceLine();
+            _StdOut.putText("Error message:");
+            _StdOut.advanceLine();
+            _StdOut.putText(msg);
+            _StdOut.advanceLine();
+            _StdOut.putText("OntOS will now exit.");
             this.krnShutdown();
         }
     }
