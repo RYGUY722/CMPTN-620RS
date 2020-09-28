@@ -131,11 +131,29 @@ var TSOS;
                 decided to write one function and use the term "text" to connote string or char.
             */
             if (text !== "") {
+                var text2 = "";
+                // Calculate how far the line will have to move forwards.
+                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                // The following statements are responsible for line wrapping.
+                if ((this.currentXPosition + offset) >= _Canvas.width) { // First, check if we would go off the side of the canvas. If not, we can skip this whole chunk of code. If we would...
+                    text2 = text.charAt(text.length - 1) + text2; // Take a character from the end of the text string and place it in a new second string.
+                    text = text.substring(0, text.length - 1); // Then remove it from the original text string.
+                    var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text); // Then check to see how far we'll have to go to fit this shorter line of text on the line.
+                    while ((this.currentXPosition + offset) >= _Canvas.width) { // Continue splitting the string like explained above until it will fit onto the current line.
+                        text2 = text.charAt(text.length - 1) + text2;
+                        text = text.substring(0, text.length - 1);
+                        var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                    }
+                }
+                // Now that we've confirmed the text will fit on the current line...
                 // Draw the text at the current X and Y coordinates.
                 _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
                 // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
                 this.currentXPosition = this.currentXPosition + offset;
+                if (text2 !== "") { // If we had text that needs to go on another line, then...
+                    this.advanceLine(); // ...Move to the next line...
+                    this.putText(text2); // ...And run this method again. This recursion ensures that large chunks of text written at once will continue to be divided up into appropriate lines.
+                }
             }
         }
         removeText(text) {

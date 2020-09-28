@@ -307,6 +307,7 @@ var TSOS;
             //Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
             var a = document.getElementById("taProgramInput").value;
             a = a.replace(/\s/g, ''); //The integer cannot store spaces, so we remove them from the original string here.
+            var fin = a; //If the code is valid, we will need to copy a at it's current point into memory, so we might as well store it in another variable instead of undoing later changes.
             //There are 2 checks to perform before checking if "a" is a valid hexadecimal string
             if (a.length == 0) { //If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
                 _StdOut.putText("Please enter an instruction set.");
@@ -321,6 +322,9 @@ var TSOS;
                 }
                 if (a.toLowerCase() == b.toString(16)) {
                     _StdOut.putText("The instruction set is valid.");
+                    for (let i = 0; i < fin.length / 2; i++) { // Write the user code into memory, byte by byte
+                        console.log(_MemoryAccessor.write(i, (fin.charAt(i) + fin.charAt(i + 1))));
+                    }
                 }
                 else {
                     _StdOut.putText("The instruction set is invalid.");

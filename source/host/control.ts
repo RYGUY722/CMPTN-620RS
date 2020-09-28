@@ -80,6 +80,7 @@ module TSOS {
             // .. enable the Halt and Reset buttons ...
             (<HTMLButtonElement>document.getElementById("btnHaltOS")).disabled = false;
             (<HTMLButtonElement>document.getElementById("btnReset")).disabled = false;
+            (<HTMLButtonElement>document.getElementById("btnModeChange")).disabled = false;
 
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
@@ -87,6 +88,10 @@ module TSOS {
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init();       //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+			_Memory = new Memory();
+			_Memory.init();
+			_MemoryAccessor = new MemoryAccessor();
+			_MemoryAccessor.init();
 
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
@@ -111,6 +116,34 @@ module TSOS {
             // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
+        }
+		
+        public static hostBtnModeChange_click(btn): void {
+			if(_hardwareClockID !==-1){ //If there is currently a clock pulse, then we're in normal mode.
+				Control.hostLog("Switching to Single-Step Mode.", "host");
+				// Stop the interval that's simulating our clock pulse.
+				clearInterval(_hardwareClockID);
+				_hardwareClockID = -1; //To keep track that there is no longer a clock pulse, I set this to -1.
+				// Allow the user to click the step button
+				(<HTMLButtonElement>document.getElementById("btnStep")).disabled = false;
+				// And display that we are now in Single-Step Mode.
+				(<HTMLButtonElement>document.getElementById("btnModeChange")).value = "Mode: Single-Step";
+			}
+			else{ //Otherwise, we need to switch back to normal mode.
+				Control.hostLog("Switching to Normal Mode.", "host");
+				// Reset our clock pulse.
+				_hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
+				// Disable the step button again
+				(<HTMLButtonElement>document.getElementById("btnStep")).disabled = true;
+				// And display that we are now back in Normal Mode.
+				(<HTMLButtonElement>document.getElementById("btnModeChange")).value = "Mode: Normal";
+				
+			}
+        }
+		
+        public static hostBtnStep_click(btn): void {
+            Control.hostLog("Manually pulsing clock", "host");
+            Devices.hostClockPulse();
         }
     }
 }

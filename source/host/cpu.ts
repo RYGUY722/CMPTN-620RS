@@ -37,6 +37,57 @@ module TSOS {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
+			switch(_MemoryAccessor.read(this.PC)) { //Retrieve the next instruction from memory, and act based on it.
+				case ("A9"): { // Load constant
+					this.PC++; // Advance the program counter once,
+					var trans = parseInt(_MemoryAccessor.read(this.PC), 16); // ...Retrieve the next value from memory and translate it from a string hex value to a base 10 int (This variable is optional, but used for clarity).
+					this.Acc = trans; // ...Then set the accumulator to new value.
+					break;
+				}
+				case ("AD"): { //
+					this.PC++;
+					var addr = _MemoryAccessor.read(this.PC);
+					break;
+				}
+				case ("8D"): {
+					break;
+				}
+				case ("6D"): {
+					break;
+				}
+				case ("A2"): {
+					break;
+				}
+				case ("AE"): {
+					break;
+				}
+				case ("A0"): {
+					break;
+				}
+				case ("AC"): {
+					break;
+				}
+				case ("EA"): {
+					break;
+				}
+				case ("00"): {
+					this.isExecuting = false;
+					break;
+				}
+				case ("EC"): {
+					break;
+				}
+				case ("D0"): {
+					break;
+				}
+				case ("EE"): {
+					break;
+				}
+				case ("FF"): {
+					break;
+				}
+			}
+			this.PC++;
         }
     }
 }

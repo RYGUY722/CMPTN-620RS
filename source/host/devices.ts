@@ -31,7 +31,7 @@ module TSOS {
             _OSclock++;
             // Call the kernel clock pulse event handler.
             _Kernel.krnOnCPUClockPulse();
-			//Display/Update the date display.
+			// Display/Update the date display.
 			var d = new Date();
             document.getElementById("dateIn").innerHTML = d.toLocaleString();
         }
