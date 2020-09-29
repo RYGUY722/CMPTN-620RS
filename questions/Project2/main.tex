@@ -1,0 +1,166 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% CMPT xxx
+% Fall 2020
+% Lab One
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from: http://www.LaTeXTemplates.com
+% Original author: % Frits Wenneker (http://www.howtotex.com)
+% License: CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+% Modified by Alan G. Labouseur  - alan@labouseur.com
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+
+\documentclass[letterpaper, 10pt,DIV=13]{scrartcl} 
+
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm,xfrac} % Math packages
+\usepackage{sectsty} % Allows customizing section commands
+\usepackage{graphicx}
+\usepackage[lined,linesnumbered,commentsnumbered]{algorithm2e}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\usepackage{tabularx}
+
+\allsectionsfont{\normalfont\scshape} % Make all section titles in default font and small caps.
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{page \thepage\ of \pageref{LastPage}} % Page numbering for right footer
+
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs.
+
+\binoppenalty=3000
+\relpenalty=3000
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+   \normalfont \normalsize 
+   \textsc{CMPT 424N - Fall 2020 - Dr. Labouseur} \\[10pt] % Header stuff.
+   \horrule{0.5pt} \\[0.25cm] 	% Top horizontal rule
+   \huge Project Two  \\     	    % Assignment title
+   \horrule{0.5pt} \\[0.25cm] 	% Bottom horizontal rule
+}
+
+\author{Ryan Sheffler \\ \normalsize Ryan.Sheffler1@Marist.edu}
+
+\date{\normalsize\today} 	% Today's date.
+
+\begin{document}
+\maketitle % Print the title
+
+%----------------------------------------------------------------------------------------
+%   start PROBLEM ONE
+%----------------------------------------------------------------------------------------
+\stepcounter{section}
+\stepcounter{section}
+\section{Lab Three}
+
+\subsection{}
+Explain the difference between internal and external fragmentation.
+
+The "internal" and "external" refer to the allocated space of memory. With internal fragmentation, a larger space is allocated than is actually used. This creates gaps of unused space in the memory that no one else is allowed to use since it was allocated for a different purpose, even though it was never taken advantage of. It's like getting handed \$20 by a parent for lunch, but only using \$18 and being told to keep the change. External fragmentation is gaps outside of allocated space. These gaps may form as things exit memory. There may have been 3 processes which were each allocated 200KB right next to each other in memory, but then the one occupying the center parts of memory finished and was cleared. This creates external fragmentation, as the 2 remaining processes have a large, empty gap between them.
+\subsection{}
+Given five (5) memory partitions of 100KB, 500KB, 200KB, 300KB, and 600KB (in that order), how would optimal, first-fit, best-fit, and worst-fit algorithms place processes of 212KB, 417KB, 112KB, and 426KB (in that order)?
+
+For ease of reference, I'm going to refer to the partitions and processes by simple names:
+
+\begin{center}
+Partitions:
+\newline
+\begin{tabular}{ |c|c| } 
+\hline
+Name & Size \\
+\hline
+\hline
+Partition 1 & 100KB \\
+\hline
+Partition 2 & 500KB \\
+\hline
+Partition 3 & 200KB \\
+\hline
+Partition 4 & 300KB \\
+\hline
+Partition 5 & 600KB \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+Processes:
+\newline
+\begin{tabular}{ |c|c| } 
+\hline
+Name & Size \\
+\hline
+\hline
+Process 1 & 212KB \\
+\hline
+Process 2 & 417KB \\
+\hline
+Process 3 & 112KB \\
+\hline
+Process 4 & 426KB \\
+\hline
+\end{tabular}
+\end{center}
+
+Anyways, the answers:
+\newline
+
+\begin{center}
+\begin{tabularx}{\textwidth}{| l |X|}
+\hline
+First-Fit & First-Fit algorithms just go down the line of partitions and chuck the process wherever it fits as soon as it finds one it fits in. Process 1 would end up in Partition 2, Process 2 would end up in Partition 5, Process 3 could also fit within Partition 2 alongside Process 1, but Process 4 can't fit in any of the remaining space, so it would have to wait for either Partition 2 or 5 to free up. \\ 
+\hline
+Best-Fit & Best-Fit algorithms try to fit the process in the smallest partition it can fit into. With Best-Fit, Process 1 would be put in Partition 4, Process 2 would be placed in Partition 2, Process 3 would be put into Partition 3, and Process 4 would be left with Partition 5.\\ 
+\hline
+Worst-Fit & Worst-Fit algorithms follow the exact opposite path of Best-Fit. They place processes into the largest available partition. With a Worst-Fit algorithm, Process 1 would get Partition 5, Process 2 would have Partition 2, Process 3 would be in Partition 4, and Process 4 would have to wait again until Partition 2 or 5 is clear enough.\\ 
+\hline
+\end{tabularx}
+\end{center}
+Obviously, the optimal algorithm here would be Best-Fit, as that is the only one where all 4 processes actually get to enter memory.
+
+\pagebreak
+
+\section{Lab Four}
+
+\subsection{}
+What is the relationship between a guest operating system and a host operating system in a system like VMware? What factors need to be considered in choosing the host operating system?
+
+With a guest and host operating system, one operating system is within the other. The host provides for the guest. Just like any other user program, the guest operating system never reaches the hardware. When it wants to, it has to approach the host operating system to have it reach the hardware for it.
+
+Take a moment to pretend that you're hooking two hoses together. Unfortunately, one is slightly thinner, its diameter is a little smaller than the other's. Likely, what you'd do is hook the larger hose up to the spigot, then go down to the smaller hose. At the end of the day, the amount of water that comes out will be the same, but this way will at least preserve some water pressure. Host and guest operating systems are a little like that. Normally, an operating system acts as the layer between the user and the hardware. In the case of a guest operating system, it doesn't get to touch the hardware, it has to go through the host instead. This undoubtedly slows things down, but its best if the host operating system is more open or general in terms of resources and system call interface. The more the host operating system is capable of dealing with, the less likely it is for the guest to call for something the host cannot do. If the guest can't do something, only the guest and things within it will have to stop. If the host can't do something, it takes down everything, including other programs, the guest, and everything the guest was doing within it.
+
+\end{document}
