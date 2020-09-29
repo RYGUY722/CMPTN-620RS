@@ -56,7 +56,12 @@ var TSOS;
             // Unload the Device Drivers?
             // More?
             //
+            _CPU.isExecuting = false; // Kill the lightshow
             this.krnTrace("end shutdown OS");
+        }
+        krnProgramBreak() {
+            _ProcessList[_CurrentProcess].save();
+            _CPU.isExecuting = false;
         }
         krnOnCPUClockPulse() {
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.

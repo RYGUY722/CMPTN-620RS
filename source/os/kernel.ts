@@ -67,8 +67,16 @@ module TSOS {
             // Unload the Device Drivers?
             // More?
             //
+			
+			_CPU.isExecuting = false; // Kill the lightshow
+			
             this.krnTrace("end shutdown OS");
         }
+		
+		public krnProgramBreak() { //This method saves the PCB of a process and forces the CPU to stop executing.
+			_ProcessList[_CurrentProcess].save();
+			_CPU.isExecuting = false;
+		}
 
 
         public krnOnCPUClockPulse() {

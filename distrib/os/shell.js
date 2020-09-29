@@ -356,10 +356,8 @@ var TSOS;
                     if (valid && (a.toLowerCase() == b.toString(16))) {
                         _StdOut.putText("The instruction set is valid.");
                         _StdOut.advanceLine();
-                        _Memory.init(); // Memory should be cleared before writing new programs.
-                        for (let i = 0; i < fin.length; i += 2) { // Write the user code into memory, byte by byte (yes, bytes are still 2 characters).
-                            _MemoryAccessor.write(i / 2, (fin.charAt(i) + fin.charAt(i + 1)));
-                        }
+                        _MemoryManager.clear(); // Memory should be cleared before writing new programs.
+                        _MemoryManager.load(fin); // Load the user's code into the memory
                         _ProcessList.push(new TSOS.ProcessControlBlock());
                         _StdOut.putText("New Process ID: " + _ProcessCounter);
                         _ProcessCounter++;
