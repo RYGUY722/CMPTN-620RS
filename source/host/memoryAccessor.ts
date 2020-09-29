@@ -10,7 +10,7 @@ module TSOS {
 		
 		public read(address): string { // This method reads a single byte from memory at the given address, returning it as a string.
 			if(address<MEM_MAXIMUM_SIZE){ // First, check the given address is valid before attempting to retrieve the value.
-				return _Memory.memory[address];
+				return _Memory.memory[address].toString();
 			}
 			else{ // If not valid, return a null.
 				return "";

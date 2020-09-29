@@ -66,7 +66,11 @@ var TSOS;
                     var addr = _MemoryAccessor.read(this.PC);
                     this.PC++;
                     addr = _MemoryAccessor.read(this.PC) + addr;
-                    _MemoryAccessor.write(parseInt(addr, 16), this.Acc); // The only difference is that we write the current accumulator to the targeted address, rather than placing the value from memory into the accumulator.
+                    var hexAcc = this.Acc.toString(16); // All bytes in memory are written in hexadecimal, so we need to translate the accumulator's value to hex first.
+                    if (hexAcc.length < 2) { // When the accumulator value is under 16, it will simply write 1 digit. All memory values are 2 characters long, so we need to add a starting 0.
+                        hexAcc = "0" + hexAcc;
+                    }
+                    _MemoryAccessor.write(parseInt(addr, 16), hexAcc); // The only difference is that we write the current accumulator to the targeted address, rather than placing the value from memory into the accumulator.
                     break;
                 }
                 case ("6D"): { // ADC: Add a value from memory to the accumulator.
@@ -145,7 +149,11 @@ var TSOS;
                     addr = _MemoryAccessor.read(this.PC) + addr;
                     var val = parseInt(_MemoryAccessor.read(parseInt(addr, 16)), 16); // Retrieve the value as a base 10 number.
                     val = (val + 1) % 256; // Add 1 to the value, but wrap around since it is only a 1 byte value
-                    _MemoryAccessor.write(addr, val.toString(16)); //Translate the value back into a hexadecimal string and write it back into memory.
+                    var hexval = val.toString(16); // This is the same code as in opcode 8D, and for the same reason.
+                    if (hexval.length < 2) {
+                        hexval = "0" + hexval;
+                    }
+                    _MemoryAccessor.write((parseInt(addr, 16)), hexval); //Write the translated string back into memory.
                     break;
                 }
                 case ("FF"): {

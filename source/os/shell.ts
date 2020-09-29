@@ -363,9 +363,13 @@ module TSOS {
 			_StdOut.putText("First Low Orbit Station: Rhadamanthus.");
 		}
 		
-		public shellStatus(args: string[]) { //Allows the user to input a status to display at the top of the screen
+		public shellStatus(args: string[]) { // Allows the user to input a status to display at the top of the screen
 			if (args.length > 0) {
-				document.getElementById("statusIn").innerHTML = args[0];
+				var stat = args[0];
+				for(var i = 1; i < args.length; i++) { // Args is an array split on spaces. For the status, we need to undo that.
+					stat = stat + " " + args[i];
+				}
+				document.getElementById("statusIn").innerHTML = stat;
 			}
 			else {
                 _StdOut.putText("Usage: status <string>  Please supply a string.");
@@ -430,6 +434,7 @@ module TSOS {
 					if(valid && (a.toLowerCase()==b.toString(16))) {
 						_StdOut.putText("The instruction set is valid.");
 						_StdOut.advanceLine();
+						_Memory.init(); // Memory should be cleared before writing new programs.
 						for (let i = 0; i < fin.length; i+=2) { // Write the user code into memory, byte by byte (yes, bytes are still 2 characters).
 							_MemoryAccessor.write(i/2, (fin.charAt(i)+fin.charAt(i+1)));
 						}

@@ -136,9 +136,15 @@ var TSOS;
             var newtab = document.createElement('tbody');
             for (var i = 0; i < MEM_MAXIMUM_SIZE; i += 8) {
                 var row = newtab.insertRow(-1);
-                row.insertCell(-1).innerHTML = ("0x" + i.toString(16).toUpperCase());
+                var addrstr = i.toString(16).toUpperCase(); // To display the memory address, I turn i into a hexadecimal string. For clarity, I broke it up into a new variable.
+                while (addrstr.length < 3) { // To make it look good, I want all addresses to be the same size. I didn't want to do all that in a single line, this is clearer.
+                    addrstr = "0" + addrstr;
+                }
+                row.insertCell(-1).innerHTML = ("0x" + addrstr);
                 for (var c = 0; c < 8; c++) {
-                    row.insertCell(-1).innerHTML = _MemoryAccessor.read(i + c).toUpperCase();
+                    var memval = _MemoryAccessor.read(i + c);
+                    memval = memval.toString();
+                    row.insertCell(-1).innerHTML = memval.toUpperCase();
                 }
             }
             table.replaceChild(newtab, table.tBodies[0]);
@@ -147,7 +153,7 @@ var TSOS;
             var table = document.getElementById("tbCPU");
             var row = table.rows[1];
             row.cells[0].innerHTML = _CPU.isExecuting.toString();
-            row.cells[1].innerHTML = _CPU.PC.toString();
+            row.cells[1].innerHTML = _CPU.PC.toString(16).toUpperCase();
             row.cells[2].innerHTML = _MemoryAccessor.read(_CPU.PC);
             row.cells[3].innerHTML = _CPU.Acc.toString(16).toUpperCase();
             row.cells[4].innerHTML = _CPU.Xreg.toString(16).toUpperCase();
@@ -164,7 +170,7 @@ var TSOS;
             }
             for (var i = 0; i < _ProcessCounter; i++) {
                 var row = table.rows[(i + 1)];
-                row.cells[0].innerHTML = _ProcessList[i].PC.toString();
+                row.cells[0].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
                 row.cells[1].innerHTML = _ProcessList[i].Acc.toString(16).toUpperCase();
                 row.cells[2].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
                 row.cells[3].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
