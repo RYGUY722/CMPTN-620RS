@@ -107,6 +107,13 @@ var TSOS;
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
                     break;
+                case PROGRAM_IRQ: // System call from a user program
+                    if (_CPU.Xreg == 1) {
+                        _StdOut.putText(_CPU.Yreg);
+                    }
+                    else if (_CPU.Xreg == 2) {
+                    }
+                    break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
             }
@@ -164,6 +171,10 @@ var TSOS;
             _StdOut.putText(msg);
             _StdOut.advanceLine();
             _StdOut.putText("OntOS will now exit.");
+            if (_SarcasticMode) {
+                _StdOut.advanceLine();
+                _StdOut.putText("Siren has been deployed. Good luck.");
+            }
             this.krnShutdown();
         }
     }

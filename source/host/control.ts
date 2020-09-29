@@ -87,7 +87,7 @@ module TSOS {
 
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
-            _CPU.init();       //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+            _CPU.init();       // There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
 			_Memory = new Memory();
 			_Memory.init();
 			_MemoryAccessor = new MemoryAccessor();
@@ -120,7 +120,7 @@ module TSOS {
 		
         public static hostBtnModeChange_click(btn): void {
 			if(_hardwareClockID !==-1){ //If there is currently a clock pulse, then we're in normal mode.
-				Control.hostLog("Switching to Single-Step Mode.", "host");
+				Control.hostLog("Switching to Single-Step Mode", "host");
 				// Stop the interval that's simulating our clock pulse.
 				clearInterval(_hardwareClockID);
 				_hardwareClockID = -1; //To keep track that there is no longer a clock pulse, I set this to -1.
@@ -130,7 +130,7 @@ module TSOS {
 				(<HTMLButtonElement>document.getElementById("btnModeChange")).value = "Mode: Single-Step";
 			}
 			else{ //Otherwise, we need to switch back to normal mode.
-				Control.hostLog("Switching to Normal Mode.", "host");
+				Control.hostLog("Switching to Normal Mode", "host");
 				// Reset our clock pulse.
 				_hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
 				// Disable the step button again
@@ -141,9 +141,65 @@ module TSOS {
 			}
         }
 		
-        public static hostBtnStep_click(btn): void {
+        public static hostBtnStep_click(btn): void { // Pushes the clock forward one cycle manually.
             Control.hostLog("Manually pulsing clock", "host");
             Devices.hostClockPulse();
         }
+		
+		public static updateDisplays(): void { // A compilation method of all the methods that update displays on the OS page, to make it simpler and quicker to call.
+			Control.updateDate();
+			Control.updateMemory();
+			Control.updateCPUStatus();
+			Control.updatePCBStatus();
+		}
+		
+		public static updateDate(): void { // Updates the taskbar date display
+			var d = new Date();
+            document.getElementById("dateIn").innerHTML = d.toLocaleString();
+		}
+		
+		public static updateMemory(): void { // Updates the memory display table
+			var table = (<HTMLTableElement>document.getElementById("tbMemory"));
+            var newtab = document.createElement('tbody');
+			for(var i = 0; i < MEM_MAXIMUM_SIZE; i+=8) {
+				var row = newtab.insertRow(-1);
+				row.insertCell(-1).innerHTML = ("0x" + i.toString(16).toUpperCase());
+				for(var c = 0; c < 8; c++) {
+					row.insertCell(-1).innerHTML = _MemoryAccessor.read(i+c).toUpperCase();
+				}
+			}
+			table.replaceChild(newtab, table.tBodies[0]);
+		}
+		
+		public static updateCPUStatus(): void { // Updates the CPU Status display table
+			var table = (<HTMLTableElement>document.getElementById("tbCPU"));
+			var row = table.rows[1];
+			row.cells[0].innerHTML = _CPU.isExecuting.toString();
+			row.cells[1].innerHTML = _CPU.PC.toString();
+			row.cells[2].innerHTML = _MemoryAccessor.read(_CPU.PC);
+            row.cells[3].innerHTML = _CPU.Acc.toString(16).toUpperCase();
+            row.cells[4].innerHTML = _CPU.Xreg.toString(16).toUpperCase();
+            row.cells[5].innerHTML = _CPU.Yreg.toString(16).toUpperCase();
+            row.cells[6].innerHTML = _CPU.Zflag.toString();
+		}
+		
+		public static updatePCBStatus(): void { // Updates the PCB Status display table
+			var table = (<HTMLTableElement>document.getElementById("tbPCB"));
+			while(_ProcessCounter>=table.rows.length){
+				var newrow = table.insertRow(-1);
+				for(var i = 0; i < 6; i++) {
+					newrow.insertCell(-1);
+				}
+			}
+			for(var i = 0; i < _ProcessCounter; i++){
+				var row = table.rows[(i+1)];
+				row.cells[0].innerHTML = _ProcessList[i].PC.toString();
+				row.cells[1].innerHTML = _ProcessList[i].Acc.toString(16).toUpperCase();
+				row.cells[2].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
+				row.cells[3].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
+				row.cells[4].innerHTML = _ProcessList[i].Zflag.toString();
+				row.cells[5].innerHTML = _ProcessList[i].completed.toString();
+			}
+		}
     }
 }

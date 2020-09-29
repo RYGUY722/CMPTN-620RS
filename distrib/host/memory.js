@@ -6,8 +6,8 @@ var TSOS;
             this.memory = memory;
         }
         init() {
-            for (var index in this.memory) {
-                this.memory[index] = "00";
+            for (var i = 0; i < MEM_MAXIMUM_SIZE; i++) {
+                this.memory[i] = "00";
             }
         }
     }

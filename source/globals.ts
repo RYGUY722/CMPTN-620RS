@@ -22,6 +22,7 @@ const MEM_MAXIMUM_SIZE: number = MEM_SEGMENT_SIZE*1; // Please place the number 
 const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
+const PROGRAM_IRQ: number = 2;
 
 
 //
@@ -53,6 +54,11 @@ var _Kernel: TSOS.Kernel;
 var _KernelInterruptQueue: TSOS.Queue = null;
 var _KernelInputQueue: TSOS.Queue = null; 
 var _KernelBuffers = null; 
+
+// Processes
+var _ProcessCounter: number = 0;
+var _CurrentProcess: number;
+var _ProcessList: TSOS.ProcessControlBlock[] = new Array();
 
 // Standard input and output
 var _StdIn:  TSOS.Console = null; 

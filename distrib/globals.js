@@ -18,6 +18,7 @@ const MEM_MAXIMUM_SIZE = MEM_SEGMENT_SIZE * 1; // Please place the number of des
 const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ = 1;
+const PROGRAM_IRQ = 2;
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
@@ -41,6 +42,10 @@ var _Kernel;
 var _KernelInterruptQueue = null;
 var _KernelInputQueue = null;
 var _KernelBuffers = null;
+// Processes
+var _ProcessCounter = 0;
+var _CurrentProcess;
+var _ProcessList = new Array();
 // Standard input and output
 var _StdIn = null;
 var _StdOut = null;
