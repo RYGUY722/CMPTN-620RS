@@ -160,6 +160,9 @@ var TSOS;
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(PROGRAM_IRQ, null));
                     break;
                 }
+                default: {
+                    _Kernel.krnTrace("Opcode not recognized");
+                }
             }
             this.PC++; // Increment to the next part of memory.
         }

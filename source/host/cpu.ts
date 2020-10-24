@@ -166,6 +166,9 @@ module TSOS {
 					_KernelInterruptQueue.enqueue(new Interrupt(PROGRAM_IRQ, null));
 					break;
 				}
+				default: {
+					_Kernel.krnTrace("Opcode not recognized");
+				}
 			}
 			this.PC++; // Increment to the next part of memory.
         }

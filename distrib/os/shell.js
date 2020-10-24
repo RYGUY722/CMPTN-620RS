@@ -341,7 +341,7 @@ var TSOS;
                         var asub = a.substring(0, 8); // Grab a 4 byte chunk of a
                         a = a.substring(8, a.length); // Remove that chunk from a
                         var b = parseInt(asub, 16); // Translate that chunk to a base 10 int
-                        while (asub.charAt(0) == '0') { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
+                        while ((asub.charAt(0) == '0') && !(asub.length == 1)) { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly. If it's all zeroes, though, 1 should remain.
                             asub = asub.substring(1, asub.length);
                         }
                         if (!(asub.toLowerCase() == b.toString(16))) { // Translate the int back, and compare.
@@ -350,7 +350,7 @@ var TSOS;
                     }
                     // After the above loop, we have 4 bytes or less left, so we can just let it rip from here
                     var b = parseInt(a, 16); // Translate what's left to a base 10 int
-                    while (a.charAt(0) == '0') { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
+                    while ((a.charAt(0) == '0') && !(a.length == 1)) { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly. If it's all zeroes, though, 1 should remain.
                         a = a.substring(1, a.length);
                     }
                     if (valid && (a.toLowerCase() == b.toString(16))) {
