@@ -46,3 +46,21 @@ h3 {
   font-size: 8pt;
   text-align: center;
 }
+
+table {
+  display: block;
+  border: 2px solid red;
+  background-color: #DFDBC3;
+  width: 365px;
+  text-align: center;
+  border-collapse: collapse;
+}
+
+table td, table th {
+  border: 1px solid black;
+}
+
+#tbMemory {
+  overflow-y:scroll;
+  height:200px;
+}

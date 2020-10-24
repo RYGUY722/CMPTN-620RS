@@ -55,7 +55,10 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Sets the current status.");
             this.commandList[this.commandList.length] = sc;
             // load
-            sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Retrieves the user program and verifies it.");
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Retrieves the user program, verifies it, and prepares it to be run in memory.");
+            this.commandList[this.commandList.length] = sc;
+            // run
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "<integer> - Runs the program with the provided Process ID, if it's in memory.");
             this.commandList[this.commandList.length] = sc;
             // brick <string>
             sc = new TSOS.ShellCommand(this.shellBrick, "brick", "<string> - Triggers the fatal error response. Optional custom message.");
@@ -296,35 +299,90 @@ var TSOS;
         }
         shellStatus(args) {
             if (args.length > 0) {
-                document.getElementById("statusIn").innerHTML = args[0];
+                var stat = args[0];
+                for (var i = 1; i < args.length; i++) { // Args is an array split on spaces. For the status, we need to undo that.
+                    stat = stat + " " + args[i];
+                }
+                document.getElementById("statusIn").innerHTML = stat;
             }
             else {
                 _StdOut.putText("Usage: status <string>  Please supply a string.");
             }
         }
-        //Currently only checks to see that the code is valid. TODO: Actually load code
+        // Loads the code from the User Program Input field.
         shellLoad(args) {
-            //Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
-            var a = document.getElementById("taProgramInput").value;
-            a = a.replace(/\s/g, ''); //The integer cannot store spaces, so we remove them from the original string here.
-            //There are 2 checks to perform before checking if "a" is a valid hexadecimal string
-            if (a.length == 0) { //If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
-                _StdOut.putText("Please enter an instruction set.");
+            // First, check if there's an uncompleted program in memory. Right now, only one program can be in memory, so check the last one.
+            if (_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter - 1].completed) && !(_ProcessList[_ProcessCounter - 1].rewrite)) {
+                _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
+                _ProcessList[_ProcessCounter - 1].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
             }
-            else if (a.length % 2 != 0) { //Hexadecimal opcodes come in pairs (00-FF), so the string length must be even.
-                _StdOut.putText("The instruction set is invalid.");
-            }
-            else { //If the string passes the 2 prerequisites, check if it is valid hexadecimal.
-                var b = parseInt(a, 16);
-                while (a.charAt(0) == '0') { //If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
-                    a = a.substring(1, a.length);
+            else {
+                if (_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter - 1].completed) && _ProcessList[_ProcessCounter - 1].rewrite) { // Even if it wasn't used, though, each PCB should be marked as completed when wiped. Otherwise, an invalid process could be run.
+                    _ProcessList[_ProcessCounter - 1].completed = true;
                 }
-                if (a.toLowerCase() == b.toString(16)) {
-                    _StdOut.putText("The instruction set is valid.");
+                // Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
+                var a = document.getElementById("taProgramInput").value;
+                a = a.replace(/\s/g, ''); // The integer cannot store spaces, so we remove them from the original string here.
+                var fin = a; //If the code is valid, we will need to copy a at it's current point into memory, so we might as well store it in another variable instead of undoing later changes.
+                // There are 2 checks to perform before checking if "a" is a valid hexadecimal string
+                if (a.length == 0) { // If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
+                    _StdOut.putText("Please enter an instruction set.");
                 }
-                else {
+                else if (a.length % 2 != 0) { // Hexadecimal opcodes come in pairs (00-FF), so the string length must be even.
                     _StdOut.putText("The instruction set is invalid.");
                 }
+                else if (a.length > (MEM_SEGMENT_SIZE * 2)) { // We should also check that it can actually fit into memory first, too (each byte is 2 characters).
+                    _StdOut.putText("The instruction set is too large.");
+                }
+                else { // If the string passes the prerequisites, check if it is valid hexadecimal.
+                    var valid = true; // This boolean will push us out if the hex is ever invalid.
+                    // Unfortunately, the method I found relies on converting the hexadecimal to a 4-byte integer, which means I have to chunk it up like this to verify.
+                    while (valid && a.length > 8) { // I'm sure there's a way to do this cleaner, like through a for loop or something, but I'm just not sure how to do that.
+                        var asub = a.substring(0, 8); // Grab a 4 byte chunk of a
+                        a = a.substring(8, a.length); // Remove that chunk from a
+                        var b = parseInt(asub, 16); // Translate that chunk to a base 10 int
+                        while (asub.charAt(0) == '0') { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
+                            asub = asub.substring(1, asub.length);
+                        }
+                        if (!(asub.toLowerCase() == b.toString(16))) { // Translate the int back, and compare.
+                            valid = false;
+                        }
+                    }
+                    // After the above loop, we have 4 bytes or less left, so we can just let it rip from here
+                    var b = parseInt(a, 16); // Translate what's left to a base 10 int
+                    while (a.charAt(0) == '0') { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly.
+                        a = a.substring(1, a.length);
+                    }
+                    if (valid && (a.toLowerCase() == b.toString(16))) {
+                        _StdOut.putText("The instruction set is valid.");
+                        _StdOut.advanceLine();
+                        _MemoryManager.clear(); // Memory should be cleared before writing new programs.
+                        _MemoryManager.load(fin); // Load the user's code into the memory
+                        _ProcessList.push(new TSOS.ProcessControlBlock());
+                        _StdOut.putText("New Process ID: " + _ProcessCounter);
+                        _ProcessCounter++;
+                    }
+                    else {
+                        _StdOut.putText("The instruction set is invalid.");
+                    }
+                }
+            }
+        }
+        // Finally, what computers were made for: Running ~~Doom~~ programs!
+        shellRun(args) {
+            var pid = parseInt(args[0], 10);
+            if (pid < _ProcessCounter && pid >= 0) {
+                if (_ProcessList[pid].completed) {
+                    _StdOut.putText("That process has already been completed!");
+                }
+                else {
+                    _StdOut.putText("Beginning Process " + pid);
+                    _StdOut.advanceLine();
+                    _CPU.execute(pid);
+                }
+            }
+            else {
+                _StdOut.putText("Please enter a valid PID!");
             }
         }
         //Kill them all. Every last one of them.

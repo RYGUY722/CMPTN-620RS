@@ -24,6 +24,8 @@ var TSOS;
             // Initialize standard input and output to the _Console.
             _StdIn = _Console;
             _StdOut = _Console;
+            // Start the memory manager
+            _MemoryManager = new TSOS.MemoryManager();
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
@@ -54,7 +56,12 @@ var TSOS;
             // Unload the Device Drivers?
             // More?
             //
+            _CPU.isExecuting = false; // Kill the lightshow
             this.krnTrace("end shutdown OS");
+        }
+        krnProgramBreak() {
+            _ProcessList[_CurrentProcess].save();
+            _CPU.isExecuting = false;
         }
         krnOnCPUClockPulse() {
             /* This gets called from the host hardware simulation every time there is a hardware clock pulse.
@@ -104,6 +111,19 @@ var TSOS;
                 case KEYBOARD_IRQ:
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
+                    break;
+                case PROGRAM_IRQ: // System call from a user program
+                    if (_CPU.Xreg == 1) {
+                        _StdOut.putText(_CPU.Yreg.toString());
+                    }
+                    else if (_CPU.Xreg == 2) {
+                        var addr = _CPU.Yreg;
+                        while (_MemoryAccessor.read(addr) != "00") {
+                            var lettercode = parseInt(_MemoryAccessor.read(addr), 16);
+                            _StdOut.putText(String.fromCharCode(lettercode));
+                            addr++;
+                        }
+                    }
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
@@ -162,6 +182,10 @@ var TSOS;
             _StdOut.putText(msg);
             _StdOut.advanceLine();
             _StdOut.putText("OntOS will now exit.");
+            if (_SarcasticMode) {
+                _StdOut.advanceLine();
+                _StdOut.putText("Siren has been deployed. Good luck.");
+            }
             this.krnShutdown();
         }
     }

@@ -26,11 +26,15 @@ var TSOS;
             // Parse the params.  TODO: Check that the params are valid and osTrapError if not.
             var keyCode = params[0];
             var isShifted = params[1];
+            var isCtrled = params[2];
             _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted);
             var chr = "";
             // Check to see if we even want to deal with the key that was pressed.
             if ((keyCode >= 65) && (keyCode <= 90)) { // letter
-                if (isShifted === true) {
+                if (isCtrled && keyCode == 67 && _CPU.isExecuting) {
+                    _Kernel.krnProgramBreak();
+                }
+                else if (isShifted === true) {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 }
                 else {
