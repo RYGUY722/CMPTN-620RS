@@ -31,6 +31,9 @@ module TSOS {
 			
 			// Start the memory manager
 			_MemoryManager = new MemoryManager();
+			
+			// Load the scheduler
+			_Scheduler = new Scheduler();
 
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");

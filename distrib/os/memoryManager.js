@@ -11,6 +11,16 @@ var TSOS;
         clear() {
             _Memory.init();
         }
+        clearSeg(segment) {
+            if (segment <= MEM_SEGMENTS) {
+                for (var i = (segment * MEM_SEGMENT_SIZE); i < (i + MEM_SEGMENT_SIZE); i++) {
+                    _MemoryAccessor.write(i, "00");
+                }
+            }
+        }
+        read(segment, address) {
+            return _MemoryAccessor.read((segment * MEM_SEGMENT_SIZE) + address);
+        }
     }
     TSOS.MemoryManager = MemoryManager;
 })(TSOS || (TSOS = {}));

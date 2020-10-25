@@ -44,7 +44,6 @@ var TSOS;
         cycle() {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
-            // Do the real work here. Be sure to set this.isExecuting appropriately.
             switch (_MemoryAccessor.read(this.PC)) { //Retrieve the next instruction from memory, and act based on it.
                 case ("A9"): { // LDA: Load constant
                     this.PC++; // Advance the program counter once,

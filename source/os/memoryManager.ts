@@ -15,5 +15,17 @@ module TSOS {
 		public clear(): void {
 			_Memory.init();
 		}
+		
+		public clearSeg(segment): void {
+			if(segment<=MEM_SEGMENTS){
+				for(var i = (segment*MEM_SEGMENT_SIZE); i < (i+MEM_SEGMENT_SIZE); i++){
+					_MemoryAccessor.write(i,"00");
+				}
+			}
+		}
+		
+		public read(segment, address): string {
+			return _MemoryAccessor.read((segment*MEM_SEGMENT_SIZE)+address);
+		}
 	}
 }

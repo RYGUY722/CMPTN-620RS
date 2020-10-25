@@ -26,6 +26,8 @@ var TSOS;
             _StdOut = _Console;
             // Start the memory manager
             _MemoryManager = new TSOS.MemoryManager();
+            // Load the scheduler
+            _Scheduler = new TSOS.Scheduler();
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
