@@ -447,7 +447,8 @@ module TSOS {
 						_Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
 						_MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
 						_ProcessList.push(new ProcessControlBlock());
-						_StdOut.putText("Process loaded into: "+targetSeg);
+						_StdOut.putText("Process loaded into segment "+targetSeg);
+						_StdOut.advanceLine();
 						_StdOut.putText("New Process ID: "+_ProcessCounter);
 						_ProcessList[_ProcessCounter].Segment = targetSeg
 						_Scheduler.addProcess(_ProcessCounter);

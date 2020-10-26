@@ -18,8 +18,10 @@ module TSOS {
 		}
 		
 		public clearSeg(segment): void {
+			var base = (segment*MEM_SEGMENT_SIZE);
+			var limit = (base+MEM_SEGMENT_SIZE);
 			if(segment<=MEM_SEGMENTS){
-				for(var i = (segment*MEM_SEGMENT_SIZE); i < (i+MEM_SEGMENT_SIZE); i++){
+				for(var i = base; i <= limit; i++){
 					_MemoryAccessor.write(i,"00");
 				}
 			}
