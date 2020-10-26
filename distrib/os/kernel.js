@@ -132,10 +132,8 @@ var TSOS;
                         }
                     }
                     break;
-                case SCHEDULER_IRQ:
-                    _Scheduler.nextProcess();
-                    _Scheduler.currentCycle = 0;
-                    _CPU.load();
+                case SCHEDULER_IRQ: // Interrupt from the scheduler to switch processes.
+                    krnDispatchNewProcess(_Scheduler.nextProcess());
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
@@ -199,6 +197,17 @@ var TSOS;
                 _StdOut.putText("Siren has been deployed. Good luck.");
             }
             this.krnShutdown();
+        }
+        krnDispatchNewProcess(pid) {
+            _Kernel.krnTrace("Switching processes"); // Inform the user.
+            if (_CurrentProcess != pid) { // If the next process is different from the current one, then we need to context switch.
+                _ProcessList[_CurrentProcess].save();
+                _ProcessList[_CurrentProcess].State = "ready";
+                _CurrentProcess = pid;
+                _ProcessList[_CurrentProcess].State = "running";
+            }
+            _CPU.load(); // Then, tell the CPU to load the data for the new process
+            _Scheduler.currentCycle = 0;
         }
     }
     TSOS.Kernel = Kernel;

@@ -45,7 +45,8 @@ module TSOS {
 			_ResidentList[_ProcessList[pid].Segment] = -1;
 			_ProcessList[pid].Segment = -1;
 			_ProcessList[pid].State = "terminated";
-			_ProcessList[pid].completed = false;
+			_ProcessList[pid].completed = true;
+			_ProcessList[pid].save();
 			
 		}
 		
@@ -54,24 +55,17 @@ module TSOS {
 			_ProcessList[pid].State = "ready";
 		}
 		
-		public nextProcess(): void {
-			_Kernel.krnTrace("Switching processes");
-			var lastPID = _CurrentProcess;
+		public nextProcess(): number { // This method finds and returns the next process to run.
 			for(var i=this.currentIndex; i!=this.currentIndex; i++){ //Iterate through the Ready List, starting at the current process, looking for the next process in the list
 				if(i>=_ReadyList.length){ // If we're at the end of the list, loop around
 					i = 0;
 				}
 				if(_ReadyList[i]!=-1){ // If the PID in the Ready List isn't -1 (no process), then we found the next process.
 					this.currentIndex = i;
-					_CurrentProcess = _ReadyList[i];
+					return _ReadyList[i];
 				}
 			}
-			if(_CurrentProcess!=lastPID) { // If the process changed, then we need to context switch.
-				_ProcessList[lastPID].save();
-				_ProcessList[lastPID].State = "ready";
-				_ProcessList[_CurrentProcess].State = "running";
-			}
-			
+			return _ReadyList[currentIndex];
 		}
 		
 	}

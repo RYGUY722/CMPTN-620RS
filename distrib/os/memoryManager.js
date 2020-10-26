@@ -24,6 +24,9 @@ var TSOS;
         read(segment, address) {
             return _MemoryAccessor.read((segment * MEM_SEGMENT_SIZE) + address);
         }
+        write(segment, address, value) {
+            return _MemoryAccessor.write((segment * MEM_SEGMENT_SIZE) + address, value);
+        }
     }
     TSOS.MemoryManager = MemoryManager;
 })(TSOS || (TSOS = {}));

@@ -30,5 +30,9 @@ module TSOS {
 		public read(segment, address): string {
 			return _MemoryAccessor.read((segment*MEM_SEGMENT_SIZE)+address);
 		}
+		
+		public write(segment, address, value): void {
+			return _MemoryAccessor.write((segment*MEM_SEGMENT_SIZE)+address, value);
+		}
 	}
 }
