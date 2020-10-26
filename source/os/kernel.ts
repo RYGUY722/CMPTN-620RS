@@ -34,6 +34,7 @@ module TSOS {
 			
 			// Load the scheduler
 			_Scheduler = new Scheduler();
+			_Scheduler.init();
 
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");

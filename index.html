@@ -100,40 +100,9 @@
              tabindex="4"
              onclick="TSOS.Control.hostBtnStep_click(this);">
    </div>
-
-   <div id="divConsole" style="margin:4px; width:500px; height:500px; float:left;">
-      <canvas id="display"
-              width="500px"
-              height="500px"
-              tabindex="3">
-      </canvas>
-   </div>
-
-   <div id="divLog" style="margin-left:520px;">
-      <label>
-         Host Log
-         <br>
-         <textarea name="taHostLog"
-                   id  ="taHostLog"
-                   rows="26"
-                   cols="48"
-         ></textarea>
-      </label>
-   </div>
-
-   <div id="divUserProgramInput" style="margin-left:520px;">
-      <label>
-         User Program Input
-         <br>
-         <textarea name="taProgramInput"
-                   id  ="taProgramInput"
-                   rows="8"
-                   cols="48"
-         ></textarea>
-      </label>
-   </div>
    
-   <div id="divMemoryTracker" style="margin-left:520px;">
+   <div id="divTrackers" style="float:left;">
+      <div id="divMemoryTracker">
       <label>
          Memory Tracker
          <br>
@@ -143,7 +112,7 @@
       </label>
    </div>
    
-   <div id="divCPUInfo" style="margin-left:520px;">
+   <div id="divCPUInfo">
       <label>
          Current CPU Status
          <br>
@@ -174,7 +143,7 @@
       </label>
    </div>
    
-   <div id="divPCBInfo" style="margin-left:520px;">
+   <div id="divPCBInfo">
       <label>
          Current PCB Status
          <br>
@@ -193,6 +162,41 @@
             </tbody>
          </table>
       </label>
+   </div>
+   </div>
+
+   <div id="divConsole" style="margin:10px; width:500px; height:500px; float:left;">
+      <canvas id="display"
+              width="500px"
+              height="500px"
+              tabindex="3">
+      </canvas>
+   </div>
+
+<div id="divLogIn">
+   <div id="divLog" style="margin-left:890px;">
+      <label>
+         Host Log
+         <br>
+         <textarea name="taHostLog"
+                   id  ="taHostLog"
+                   rows="26"
+                   cols="48"
+         ></textarea>
+      </label>
+   </div>
+
+   <div id="divUserProgramInput" style="margin-left:890px;">
+      <label>
+         User Program Input
+         <br>
+         <textarea name="taProgramInput"
+                   id  ="taProgramInput"
+                   rows="8"
+                   cols="48"
+         ></textarea>
+      </label>
+   </div>
    </div>
 </div>
 

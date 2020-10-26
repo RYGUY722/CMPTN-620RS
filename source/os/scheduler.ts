@@ -6,9 +6,11 @@ module TSOS {
 					public cycleCounter: number = 0,
 					public currentIndex: number = 0) {}
 		
-        public init(): void {}
+        public init(): void {
+			_ResidentList.fill(-1);
+		}
 		
-		public isFull(): boolean{
+		public isFull(): boolean {
 			for(var i=0; i<=MEM_SEGMENTS; i++){
 				if(_ResidentList[i]==-1){
 					return false;
@@ -17,7 +19,7 @@ module TSOS {
 			return true;
 		}
 		
-		public getNextFreeSeg(): number{
+		public getNextFreeSeg(): number {
 			for(var i=0; i<=MEM_SEGMENTS; i++){
 				if(_ResidentList[i]==-1){
 					return i;
@@ -26,29 +28,33 @@ module TSOS {
 			return -1;
 		}
 		
-		public addProcess(): number{ // Returns the segment the process was loaded to, or -1 if it couldn't be loaded in.
-			for(var i=0; i<=MEM_SEGMENTS; i++){
-				if(_ResidentList[i]==-1){
-					return i;
-				}
+		public freeSeg(segment): void {
+			if(_ResidentList[segment] != -1) {
+				_ProcessList[_ResidentList[segment]].State = "terminated";
 			}
-			return -1;
+			_ResidentList[segment] = -1;
+			_MemoryManager.clearSeg(segment);
 		}
 		
-		public endProcess(pid): void{
-			_ResidentList[_ProcessList[pid].Segment] = -1
+		public addProcess(pid): void { 
+			_ResidentList[_ProcessList[pid].Segment] = pid;
+			_ProcessList[pid].State = "waiting";
+		}
+		
+		public endProcess(pid): void {
+			_ResidentList[_ProcessList[pid].Segment] = -1;
 			_ProcessList[pid].Segment = -1;
 			_ProcessList[pid].State = "terminated";
 			_ProcessList[pid].completed = false;
 			
 		}
 		
-		public readyProcess(pid): void{
+		public readyProcess(pid): void {
 			_ReadyList.push(pid);
 			_ProcessList[pid].State = "ready";
 		}
 		
-		public nextProcess(): void{
+		public nextProcess(): void {
 			_Kernel.krnTrace("Switching processes");
 			var lastPID = _CurrentProcess;
 			for(var i=this.currentIndex; i!=this.currentIndex; i++){ //Iterate through the Ready List, starting at the current process, looking for the next process in the list
@@ -60,7 +66,7 @@ module TSOS {
 					_CurrentProcess = _ReadyList[i];
 				}
 			}
-			if(_CurrentProcess!=lastPID){ // If the process changed, then we need to context switch.
+			if(_CurrentProcess!=lastPID) { // If the process changed, then we need to context switch.
 				_ProcessList[lastPID].save();
 				_ProcessList[lastPID].State = "ready";
 				_ProcessList[_CurrentProcess].State = "running";

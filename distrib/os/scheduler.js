@@ -6,7 +6,9 @@ var TSOS;
             this.cycleCounter = cycleCounter;
             this.currentIndex = currentIndex;
         }
-        init() { }
+        init() {
+            _ResidentList.fill(-1);
+        }
         isFull() {
             for (var i = 0; i <= MEM_SEGMENTS; i++) {
                 if (_ResidentList[i] == -1) {
@@ -23,13 +25,16 @@ var TSOS;
             }
             return -1;
         }
-        addProcess() {
-            for (var i = 0; i <= MEM_SEGMENTS; i++) {
-                if (_ResidentList[i] == -1) {
-                    return i;
-                }
+        freeSeg(segment) {
+            if (_ResidentList[segment] != -1) {
+                _ProcessList[_ResidentList[segment]].State = "terminated";
             }
-            return -1;
+            _ResidentList[segment] = -1;
+            _MemoryManager.clearSeg(segment);
+        }
+        addProcess(pid) {
+            _ResidentList[_ProcessList[pid].Segment] = pid;
+            _ProcessList[pid].State = "waiting";
         }
         endProcess(pid) {
             _ResidentList[_ProcessList[pid].Segment] = -1;

@@ -136,11 +136,11 @@ var TSOS;
             var newtab = document.createElement('tbody');
             for (var i = 0; i < MEM_MAXIMUM_SIZE; i += 8) {
                 var row = newtab.insertRow(-1);
-                var addrstr = i.toString(16).toUpperCase(); // To display the memory address, I turn i into a hexadecimal string. For clarity, I broke it up into a new variable.
+                var addrstr = (i % MEM_SEGMENT_SIZE).toString(16).toUpperCase(); // To display the memory address, I turn i into a hexadecimal string. For clarity, I broke it up into a new variable.
                 while (addrstr.length < 3) { // To make it look good, I want all addresses to be the same size. I didn't want to do all that in a single line, this is clearer.
                     addrstr = "0" + addrstr;
                 }
-                row.insertCell(-1).innerHTML = ("0x" + addrstr);
+                row.insertCell(-1).innerHTML = (Math.floor(i / MEM_SEGMENT_SIZE) + "x" + addrstr);
                 for (var c = 0; c < 8; c++) {
                     var memval = _MemoryAccessor.read(i + c);
                     memval = memval.toString();

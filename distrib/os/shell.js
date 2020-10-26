@@ -312,9 +312,15 @@ var TSOS;
         // Loads the code from the User Program Input field.
         shellLoad(args) {
             // First, check if there's an uncompleted program in memory. Right now, only one program can be in memory, so check the last one.
-            if (_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter - 1].completed) && !(_ProcessList[_ProcessCounter - 1].rewrite)) {
-                _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
-                _ProcessList[_ProcessCounter - 1].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
+            // if(_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter-1].completed) && !(_ProcessList[_ProcessCounter-1].rewrite)){
+            // _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
+            // _ProcessList[_ProcessCounter-1].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
+            // }
+            if (_Scheduler.isFull()) {
+                if (!(_ProcessList[_ResidentList[0]].completed) && !(_ProcessList[_ResidentList[0]].rewrite)) {
+                    _StdOut.putText("Warning: Memory is currently full. Load again to overwrite the program in segment 0.");
+                    _ProcessList[_ResidentList[0]].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
+                }
             }
             else {
                 if (_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter - 1].completed) && _ProcessList[_ProcessCounter - 1].rewrite) { // Even if it wasn't used, though, each PCB should be marked as completed when wiped. Otherwise, an invalid process could be run.
@@ -354,12 +360,19 @@ var TSOS;
                         a = a.substring(1, a.length);
                     }
                     if (valid && (a.toLowerCase() == b.toString(16))) {
-                        _StdOut.putText("The instruction set is valid.");
+                        _StdOut.putText("The instruction set is valid."); // Give the user feedback that their code is accepted.
                         _StdOut.advanceLine();
-                        _MemoryManager.clear(); // Memory should be cleared before writing new programs.
-                        _MemoryManager.load(fin); // Load the user's code into the memory
+                        var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
+                        if (targetSeg == -1) {
+                            targetSeg = 0;
+                        } // If we got this far and there are no free segments, we're clearing and overwriting segment 0.
+                        _Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
+                        _MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
                         _ProcessList.push(new TSOS.ProcessControlBlock());
+                        _StdOut.putText("Process loaded into: " + targetSeg);
                         _StdOut.putText("New Process ID: " + _ProcessCounter);
+                        _ProcessList[_ProcessCounter].Segment = targetSeg;
+                        _Scheduler.addProcess(_ProcessCounter);
                         _ProcessCounter++;
                     }
                     else {
