@@ -163,7 +163,7 @@ var TSOS;
                     _Kernel.krnTrace("Opcode not recognized");
                 }
             }
-            this.PC++; // Increment to the next part of memory.
+            this.PC = (this.PC + 1) % 256; // Increment to the next part of memory (PC is a 1 byte value).
         }
     }
     TSOS.Cpu = Cpu;

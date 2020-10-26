@@ -96,14 +96,11 @@ module TSOS {
                 var interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
-				if(_Scheduler.currentCycle>=_Scheduler.quantum){ // Check if enough time has passed for the process to be switched
-					_Scheduler.nextProcess();
-					_Scheduler.currentCycle = -1;
-				}
-				else{ // Otherwise, just run a normal CPU cycle
-					_CPU.cycle();
-				}
+				_CPU.cycle();
 				_Scheduler.currentCycle++;
+				if(_Scheduler.currentCycle>=_Scheduler.quantum){ // Check if enough time has passed for the process to be switched
+					_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null));
+				}
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
@@ -154,6 +151,11 @@ module TSOS {
 							addr++;
 						}
 					}
+					break;
+				case SCHEDULER_IRQ:
+					_Scheduler.nextProcess();
+					_Scheduler.currentCycle = 0;
+					_CPU.load();
 					break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

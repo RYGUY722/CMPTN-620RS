@@ -10,7 +10,7 @@ module TSOS {
 		
 		public isFull(): boolean{
 			for(var i=0; i<=MEM_SEGMENTS; i++){
-				if(_ReadyList[i]==-1){
+				if(_ResidentList[i]==-1){
 					return false;
 				}
 			}
@@ -19,33 +19,44 @@ module TSOS {
 		
 		public getNextFreeSeg(): number{
 			for(var i=0; i<=MEM_SEGMENTS; i++){
-				if(_ReadyList[i]==-1){
+				if(_ResidentList[i]==-1){
 					return i;
 				}
 			}
 			return -1;
 		}
 		
-		public addProcess(): void{
-			
+		public addProcess(): number{ // Returns the segment the process was loaded to, or -1 if it couldn't be loaded in.
+			for(var i=0; i<=MEM_SEGMENTS; i++){
+				if(_ResidentList[i]==-1){
+					return i;
+				}
+			}
+			return -1;
 		}
 		
 		public endProcess(pid): void{
+			_ResidentList[_ProcessList[pid].Segment] = -1
 			_ProcessList[pid].Segment = -1;
 			_ProcessList[pid].State = "terminated";
 			_ProcessList[pid].completed = false;
 			
 		}
 		
+		public readyProcess(pid): void{
+			_ReadyList.push(pid);
+			_ProcessList[pid].State = "ready";
+		}
+		
 		public nextProcess(): void{
 			_Kernel.krnTrace("Switching processes");
 			var lastPID = _CurrentProcess;
-			for(var i=currentIndex; i!=currentIndex; i++){ //Iterate through the Ready List, starting at the current process, looking for the next process in the list
-				if(i>=MEM_SEGMENTS){ // If we're at the end of the list, loop around
+			for(var i=this.currentIndex; i!=this.currentIndex; i++){ //Iterate through the Ready List, starting at the current process, looking for the next process in the list
+				if(i>=_ReadyList.length){ // If we're at the end of the list, loop around
 					i = 0;
 				}
 				if(_ReadyList[i]!=-1){ // If the PID in the Ready List isn't -1 (no process), then we found the next process.
-					currentIndex = i;
+					this.currentIndex = i;
 					_CurrentProcess = _ReadyList[i];
 				}
 			}
@@ -53,7 +64,6 @@ module TSOS {
 				_ProcessList[lastPID].save();
 				_ProcessList[lastPID].State = "ready";
 				_ProcessList[_CurrentProcess].State = "running";
-				_CPU.load();
 			}
 			
 		}

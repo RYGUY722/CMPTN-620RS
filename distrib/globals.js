@@ -13,6 +13,7 @@
 const APP_NAME = "OntOS"; // A third of the Trinity
 const APP_VERSION = "20.X.1"; // The year is 20XX, everyone plays Fox...
 const CPU_CLOCK_INTERVAL = 100; // This is in ms (milliseconds) so 1000 = 1 second.
+const DEFAULT_QUANTUM = 3; // The default time each process gets to run.
 const MEM_SEGMENT_SIZE = 256; // The size of a memory segment code is allowed to occupy.
 const MEM_SEGMENTS = 3; // Please place the number of desired memory segments as the number within this constant.
 const MEM_MAXIMUM_SIZE = MEM_SEGMENT_SIZE * MEM_SEGMENTS; // The full memory size
@@ -20,6 +21,7 @@ const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt pri
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ = 1;
 const PROGRAM_IRQ = 2;
+const SCHEDULER_IRQ = 3;
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
@@ -48,7 +50,8 @@ var _KernelBuffers = null;
 var _ProcessCounter = 0;
 var _CurrentProcess;
 var _ProcessList = new Array();
-var _ReadyList = new Array(MEM_SEGMENTS);
+var _ResidentList = new Array(MEM_SEGMENTS);
+var _ReadyList = new Array();
 // Standard input and output
 var _StdIn = null;
 var _StdOut = null;

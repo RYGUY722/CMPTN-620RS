@@ -25,6 +25,7 @@ const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (inte
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
 const PROGRAM_IRQ: number = 2;
+const SCHEDULER_IRQ: number = 3;
 
 
 //
@@ -64,7 +65,8 @@ var _KernelBuffers = null;
 var _ProcessCounter: number = 0;
 var _CurrentProcess: number;
 var _ProcessList: TSOS.ProcessControlBlock[] = new Array();
-var _ReadyList: number[] = new Array(MEM_SEGMENTS);
+var _ResidentList: number[] = new Array(MEM_SEGMENTS);
+var _ReadyList: number[] = new Array();
 
 // Standard input and output
 var _StdIn:  TSOS.Console = null; 

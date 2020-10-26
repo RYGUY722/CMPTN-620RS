@@ -457,6 +457,7 @@ module TSOS {
 				else{
 					_StdOut.putText("Beginning Process "+pid);
 					_StdOut.advanceLine();
+					_Scheduler.readyProcess(pid);
 					_CPU.execute(pid);
 				}
 			}
