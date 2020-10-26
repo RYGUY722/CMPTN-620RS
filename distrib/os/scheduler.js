@@ -42,22 +42,28 @@ var TSOS;
             _ProcessList[pid].State = "terminated";
             _ProcessList[pid].completed = true;
             _ProcessList[pid].save();
+            if (pid == _CurrentProcess) {
+                _CurrentProcess = -1;
+            }
         }
         readyProcess(pid) {
-            _ReadyList.push(pid);
+            _ReadyList.enqueue(pid);
             _ProcessList[pid].State = "ready";
         }
         nextProcess() {
-            for (var i = this.currentIndex; i != this.currentIndex; i++) { //Iterate through the Ready List, starting at the current process, looking for the next process in the list
-                if (i >= _ReadyList.length) { // If we're at the end of the list, loop around
-                    i = 0;
+            if (!_ReadyList.isEmpty()) { // If the Ready List contains more PIDs, then we need to get the next one.
+                if (_CurrentProcess >= 0) { // When a process is ended, the Current Process is set to -1. If it isn't ended, it needs to be placed back on the end of the queue.
+                    _ReadyList.enqueue(_CurrentProcess);
                 }
-                if (_ReadyList[i] != -1) { // If the PID in the Ready List isn't -1 (no process), then we found the next process.
-                    this.currentIndex = i;
-                    return _ReadyList[i];
-                }
+                return _ReadyList.dequeue(); // To get the next queue item, we simply call dequeue.
             }
-            return _ReadyList[currentIndex];
+            else { // If the Ready List is empty, then 1 of 2 cases is true: Either only 1 process is running, or all processes are done.
+                if (_CurrentProcess == -1) { // So let's check the Current Process ID to see which it is. If it's -1, then all processes are done, so we need to shutdown.
+                    _Kernel.krnTrace("All processes complete");
+                    _CPU.isExecuting = false;
+                }
+                return _CurrentProcess; // We need to have a return value no matter what, so return the current PID to the dispatcher. If it's -1, it will ignore it.
+            }
         }
     }
     TSOS.Scheduler = Scheduler;

@@ -48,10 +48,10 @@ var _KernelInputQueue = null;
 var _KernelBuffers = null;
 // Processes
 var _ProcessCounter = 0;
-var _CurrentProcess;
+var _CurrentProcess = -1;
 var _ProcessList = new Array();
 var _ResidentList = new Array(MEM_SEGMENTS);
-var _ReadyList = new Array();
+var _ReadyList = null;
 // Standard input and output
 var _StdIn = null;
 var _StdOut = null;

@@ -32,9 +32,10 @@ module TSOS {
 			// Start the memory manager
 			_MemoryManager = new MemoryManager();
 			
-			// Load the scheduler
+			// Load the scheduler and its ready queue
 			_Scheduler = new Scheduler();
 			_Scheduler.init();
+			_ReadyList = new Queue();
 
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");
@@ -153,8 +154,8 @@ module TSOS {
 						}
 					}
 					break;
-				case SCHEDULER_IRQ:                   // Interrupt from the scheduler to switch processes.
-					krnDispatchNewProcess(_Scheduler.nextProcess());
+				case SCHEDULER_IRQ:                   // Interrupt from the scheduler to begin or switch processes.
+					this.krnDispatchNewProcess(_Scheduler.nextProcess());
 					break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
@@ -225,14 +226,17 @@ module TSOS {
         }
 		
 		public krnDispatchNewProcess(pid) {
-			_Kernel.krnTrace("Switching processes"); // Inform the user.
-			if(_CurrentProcess!=pid) { // If the next process is different from the current one, then we need to context switch.
-				_ProcessList[_CurrentProcess].save();
-				_ProcessList[_CurrentProcess].State = "ready";
-				_CurrentProcess = pid;
-				_ProcessList[_CurrentProcess].State = "running";
+			if(pid!=-1) { // If the PID the scheduler returned was -1, then all processes are completed and we should not attempt to context switch or begin a process.
+				_Kernel.krnTrace("Switching processes"); // Inform the user.
+				if(_CurrentProcess>=0) { // Save the old data and change the process state, but only if we were already executing a process before.
+					_ProcessList[_CurrentProcess].save();
+					_ProcessList[_CurrentProcess].State = "ready";
+				}
+				_CurrentProcess = pid; // Make sure the current process is equal to whatever the scheduler wants it to be,
+				_ProcessList[_CurrentProcess].State = "running"; // and that its state is running.
+				
+				_CPU.load(); // Then, tell the CPU to load the data for the new process
 			}
-			_CPU.load(); // Then, tell the CPU to load the data for the new process
 			_Scheduler.currentCycle = 0;
 		}
     }

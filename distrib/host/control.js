@@ -164,7 +164,7 @@ var TSOS;
             var table = document.getElementById("tbPCB");
             while (_ProcessCounter >= table.rows.length) {
                 var newrow = table.insertRow(-1);
-                for (var i = 0; i < 6; i++) {
+                for (var i = 0; i < 7; i++) {
                     newrow.insertCell(-1);
                 }
             }
@@ -175,7 +175,8 @@ var TSOS;
                 row.cells[2].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
                 row.cells[3].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
                 row.cells[4].innerHTML = _ProcessList[i].Zflag.toString();
-                row.cells[5].innerHTML = _ProcessList[i].completed.toString();
+                row.cells[5].innerHTML = _ProcessList[i].State.toString();
+                row.cells[6].innerHTML = _ProcessList[i].completed.toString();
             }
         }
     }

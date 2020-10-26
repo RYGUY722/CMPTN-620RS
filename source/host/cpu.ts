@@ -142,7 +142,14 @@ module TSOS {
 					if(this.Zflag == 0){
 						var move = parseInt(_MemoryManager.read(_ProcessList[_CurrentProcess].Segment, this.PC), 16);
 						this.PC = (this.PC + move) % 256; // The program counter is a 1 byte value, so it will wrap upon hitting 256.
-						this.PC--; // PC increments at the end of this switch statement, so we need to account for that in order to start on the desired value next cycle.
+						//this.PC--; // PC increments at the end of this switch statement, so we need to account for that in order to start on the desired value next cycle.
+						
+						/* 
+						I'll be totally honest... I have no clue why this is the way it is. Logically, I should have to account for the incrementation of the PC.
+						However, this way works. I don't mean in a "yeah just throw some duct tape on there, it'll be fine" way of it works, I mean it works totally correct as is.
+						Attempting to change it, in fact, breaks it. Perhaps my math is wrong, or maybe even the program I'm testing with (the GLaDOS iP2 testing program) is wrong or something.
+						I really don't know. What I do know is that this is *functionally* the correct solution, even if it doesn't make logical sense to me.
+						*/
 					}
 					break;
 				}

@@ -469,10 +469,12 @@ module TSOS {
 					_StdOut.putText("That process has already been completed!");
 				}
 				else{
-					_StdOut.putText("Beginning Process "+pid);
+					_StdOut.putText("Beginning Process "+pid); // Inform the user that execution is beginning
 					_StdOut.advanceLine();
-					_Scheduler.readyProcess(pid);
-					_CPU.execute(pid);
+					
+					_Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
+					_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null)); // Prep the dispatcher
+					_CPU.isExecuting = true; // The CPU is now beginning execution.
 				}
 			}
 			else{
