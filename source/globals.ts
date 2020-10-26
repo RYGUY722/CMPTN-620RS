@@ -15,6 +15,7 @@ const APP_NAME: string    = "OntOS";   // A third of the Trinity
 const APP_VERSION: string = "20.X.1";   // The year is 20XX, everyone plays Fox...
 
 const CPU_CLOCK_INTERVAL: number = 100;   // This is in ms (milliseconds) so 1000 = 1 second.
+const DEFAULT_QUANTUM: number = 3; // The default time each process gets to run.
 
 const MEM_SEGMENT_SIZE: number = 256; // The size of a memory segment code is allowed to occupy.
 const MEM_SEGMENTS: number = 3; // Please place the number of desired memory segments as the number within this constant.

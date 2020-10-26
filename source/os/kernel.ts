@@ -96,7 +96,14 @@ module TSOS {
                 var interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
-                _CPU.cycle();
+				if(_Scheduler.currentCycle>=_Scheduler.quantum){ // Check if enough time has passed for the process to be switched
+					_Scheduler.nextProcess();
+					_Scheduler.currentCycle = -1;
+				}
+				else{ // Otherwise, just run a normal CPU cycle
+					_CPU.cycle();
+				}
+				_Scheduler.currentCycle++;
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
