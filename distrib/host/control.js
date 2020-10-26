@@ -164,19 +164,20 @@ var TSOS;
             var table = document.getElementById("tbPCB");
             while (_ProcessCounter >= table.rows.length) {
                 var newrow = table.insertRow(-1);
-                for (var i = 0; i < 7; i++) {
+                for (var i = 0; i < 8; i++) {
                     newrow.insertCell(-1);
                 }
             }
             for (var i = 0; i < _ProcessCounter; i++) {
                 var row = table.rows[(i + 1)];
-                row.cells[0].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
-                row.cells[1].innerHTML = _ProcessList[i].Acc.toString(16).toUpperCase();
-                row.cells[2].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
-                row.cells[3].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
-                row.cells[4].innerHTML = _ProcessList[i].Zflag.toString();
-                row.cells[5].innerHTML = _ProcessList[i].State.toString();
-                row.cells[6].innerHTML = _ProcessList[i].completed.toString();
+                row.cells[0].innerHTML = _ProcessList[i].PID.toString();
+                row.cells[1].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
+                row.cells[2].innerHTML = _ProcessList[i].Acc.toString(16).toUpperCase();
+                row.cells[3].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
+                row.cells[4].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
+                row.cells[5].innerHTML = _ProcessList[i].Zflag.toString();
+                row.cells[6].innerHTML = _ProcessList[i].State.toString();
+                row.cells[7].innerHTML = _ProcessList[i].completed.toString();
             }
         }
     }
