@@ -65,6 +65,7 @@ var TSOS;
             document.getElementById("btnHaltOS").disabled = false;
             document.getElementById("btnReset").disabled = false;
             document.getElementById("btnModeChange").disabled = false;
+            document.getElementById("btnProcessView").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
@@ -121,11 +122,24 @@ var TSOS;
             Control.hostLog("Manually pulsing clock", "host");
             TSOS.Devices.hostClockPulse();
         }
+        static hostBtnProcessView_click(btn) {
+            if (document.getElementById("divPCBInfo").style.display == "none") {
+                document.getElementById("divPCBInfo").style.display = "block";
+                document.getElementById("divReadyInfo").style.display = "none";
+                document.getElementById("btnProcessView").value = "Showing: All";
+            }
+            else {
+                document.getElementById("divPCBInfo").style.display = "none";
+                document.getElementById("divReadyInfo").style.display = "block";
+                document.getElementById("btnProcessView").value = "Showing: Ready";
+            }
+        }
         static updateDisplays() {
             Control.updateDate();
             Control.updateMemory();
             Control.updateCPUStatus();
             Control.updatePCBStatus();
+            Control.updateReadyDisplay();
         }
         static updateDate() {
             var d = new Date();
@@ -179,6 +193,48 @@ var TSOS;
                 row.cells[6].innerHTML = _ProcessList[i].State.toString();
                 row.cells[7].innerHTML = _ProcessList[i].completed.toString();
             }
+        }
+        static updateReadyDisplay() {
+            var table = document.getElementById("tbReady");
+            var new_tbody = document.createElement('tbody');
+            var qString = _ReadyList.toString();
+            qString = qString.substring(1, qString.length - 2);
+            var qArr = qString.split("] [");
+            if (qArr[0] == "") {
+                qArr = new Array();
+            } // There was an error where qArr was getting 1 index set to just "" which caused the lower for loop to blow up.
+            while (qArr.length - 1 >= new_tbody.rows.length) {
+                var newrow = new_tbody.insertRow(-1);
+                for (var i = 0; i < 8; i++) {
+                    newrow.insertCell(-1);
+                }
+            }
+            for (var i = 0; i < qArr.length; i++) {
+                var row = new_tbody.rows[i];
+                row.cells[0].innerHTML = _ProcessList[parseInt(qArr[i], 10)].PID.toString();
+                row.cells[1].innerHTML = _ProcessList[parseInt(qArr[i], 10)].PC.toString(16).toUpperCase();
+                row.cells[2].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Acc.toString(16).toUpperCase();
+                row.cells[3].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Xreg.toString(16).toUpperCase();
+                row.cells[4].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Yreg.toString(16).toUpperCase();
+                row.cells[5].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Zflag.toString();
+                row.cells[6].innerHTML = _ProcessList[parseInt(qArr[i], 10)].State.toString();
+                row.cells[7].innerHTML = _ProcessList[parseInt(qArr[i], 10)].completed.toString();
+            }
+            if (_CurrentProcess >= 0) {
+                var row = new_tbody.insertRow(-1);
+                for (var i = 0; i < 8; i++) {
+                    row.insertCell(-1);
+                }
+                row.cells[0].innerHTML = _ProcessList[_CurrentProcess].PID.toString();
+                row.cells[1].innerHTML = _ProcessList[_CurrentProcess].PC.toString(16).toUpperCase();
+                row.cells[2].innerHTML = _ProcessList[_CurrentProcess].Acc.toString(16).toUpperCase();
+                row.cells[3].innerHTML = _ProcessList[_CurrentProcess].Xreg.toString(16).toUpperCase();
+                row.cells[4].innerHTML = _ProcessList[_CurrentProcess].Yreg.toString(16).toUpperCase();
+                row.cells[5].innerHTML = _ProcessList[_CurrentProcess].Zflag.toString();
+                row.cells[6].innerHTML = _ProcessList[_CurrentProcess].State.toString();
+                row.cells[7].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
+            }
+            table.replaceChild(new_tbody, table.tBodies[0]);
         }
     }
     TSOS.Control = Control;

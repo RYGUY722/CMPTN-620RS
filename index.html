@@ -143,11 +143,43 @@
       </label>
    </div>
    
+   <input type="button"
+             id = "btnProcessView"
+             name="brnProcessView"
+             class="normal_button"
+             disabled="disabled"
+             value="Showing: All"
+             tabindex="3"
+             onclick="TSOS.Control.hostBtnProcessView_click(this);">
+			 
    <div id="divPCBInfo">
       <label>
          Current PCB Status
          <br>
          <table id="tbPCB">
+            <thead>
+               <tr>
+                  <th>PID</th>
+                  <th>PC</th>
+                  <th>Acc</th>
+                  <th>Xreg</th>
+                  <th>Yreg</th>
+                  <th>Zflag</th>
+				  <th>State</th>
+				  <th>Done</th>
+               </tr>
+            </thead>
+            <tbody>
+            </tbody>
+         </table>
+      </label>
+   </div>
+   
+   <div id="divReadyInfo" style="display:none;">
+      <label>
+         Current Ready Queue
+         <br>
+         <table id="tbReady">
             <thead>
                <tr>
                   <th>PID</th>
