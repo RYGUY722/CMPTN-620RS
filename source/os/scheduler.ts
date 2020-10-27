@@ -33,11 +33,13 @@ module TSOS {
 				this.endProcess(_ResidentList[segment]);
 			}
 			_MemoryManager.clearSeg(segment);
+			_Kernel.krnTrace("Cleared segment " + segment);
 		}
 		
 		public addProcess(pid): void { 
 			_ResidentList[_ProcessList[pid].Segment] = pid;
 			_ProcessList[pid].State = "waiting";
+			_Kernel.krnTrace("Process " + pid + " added");
 		}
 		
 		public endProcess(pid): void {
@@ -56,12 +58,14 @@ module TSOS {
 					val = _ReadyList.dequeue();
 				}
 			}
+			_Kernel.krnTrace("Process " + pid + " ended");
 		}
 		
 		public readyProcess(pid): void {
 			if(pid>=0){
 				_ReadyList.enqueue(pid);
 				_ProcessList[pid].State = "ready";
+				_Kernel.krnTrace("Process " + pid + " readied");
 			}
 		}
 		
@@ -78,6 +82,7 @@ module TSOS {
 					_CPU.isExecuting = false;
 					
 				}
+				_Kernel.krnTrace("Switching to process " + _CurrentProcess);
 				return _CurrentProcess; // We need to have a return value no matter what, so return the current PID to the dispatcher. If it's -1, it will ignore it.
 			}
 		}

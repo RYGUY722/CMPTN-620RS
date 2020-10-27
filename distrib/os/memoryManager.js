@@ -22,10 +22,23 @@ var TSOS;
             }
         }
         read(segment, address) {
+            if (address < 0 || address >= MEM_SEGMENT_SIZE) { // If the address is negative or somehow above the segment size, it is in violation of the access policy.
+                _Kernel.krnTrace("Memory Access Violation!");
+                _Scheduler.endProcess(_CurrentProcess); // Only the currently running process could commit an access violation. As you said, it should be ended immediately.
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // The scheduler will now need to find another process to run.
+                return "00"; // Return a dummy value, since we have to return something.
+            }
             return _MemoryAccessor.read(this.translateAddress(segment, address));
         }
         write(segment, address, value) {
-            return _MemoryAccessor.write(this.translateAddress(segment, address), value);
+            if (address < 0 || address >= MEM_SEGMENT_SIZE) { // If the address is negative or somehow above the segment size, it is in violation of the access policy.
+                _Kernel.krnTrace("Memory Access Violation!");
+                _Scheduler.endProcess(_CurrentProcess); // Only the currently running process could commit an access violation. As you said, it should be ended immediately.
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // The scheduler will now need to find another process to run.
+            }
+            else {
+                _MemoryAccessor.write(this.translateAddress(segment, address), value);
+            }
         }
         translateAddress(segment, address) {
             return (segment * MEM_SEGMENT_SIZE) + address;

@@ -30,10 +30,12 @@ var TSOS;
                 this.endProcess(_ResidentList[segment]);
             }
             _MemoryManager.clearSeg(segment);
+            _Kernel.krnTrace("Cleared segment " + segment);
         }
         addProcess(pid) {
             _ResidentList[_ProcessList[pid].Segment] = pid;
             _ProcessList[pid].State = "waiting";
+            _Kernel.krnTrace("Process " + pid + " added");
         }
         endProcess(pid) {
             _ResidentList[_ProcessList[pid].Segment] = -1;
@@ -51,11 +53,13 @@ var TSOS;
                     val = _ReadyList.dequeue();
                 }
             }
+            _Kernel.krnTrace("Process " + pid + " ended");
         }
         readyProcess(pid) {
             if (pid >= 0) {
                 _ReadyList.enqueue(pid);
                 _ProcessList[pid].State = "ready";
+                _Kernel.krnTrace("Process " + pid + " readied");
             }
         }
         nextProcess() {
@@ -70,6 +74,7 @@ var TSOS;
                     _Kernel.krnTrace("All processes complete");
                     _CPU.isExecuting = false;
                 }
+                _Kernel.krnTrace("Switching to process " + _CurrentProcess);
                 return _CurrentProcess; // We need to have a return value no matter what, so return the current PID to the dispatcher. If it's -1, it will ignore it.
             }
         }
