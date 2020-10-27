@@ -57,8 +57,26 @@ var TSOS;
             // load
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Retrieves the user program, verifies it, and prepares it to be run in memory.");
             this.commandList[this.commandList.length] = sc;
-            // run
+            // run <integer>
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<integer> - Runs the program with the provided Process ID, if it's in memory.");
+            this.commandList[this.commandList.length] = sc;
+            // runall
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "- Runs all programs currently in memory.");
+            this.commandList[this.commandList.length] = sc;
+            // clearmem
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "- Clears all memory partitions.");
+            this.commandList[this.commandList.length] = sc;
+            // ps
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "- Shows the processes and their PIDs in memory.");
+            this.commandList[this.commandList.length] = sc;
+            // kill <integer>
+            sc = new TSOS.ShellCommand(this.shellKill, "kill", "<integer> - Kills the currently running process with the given PID.");
+            this.commandList[this.commandList.length] = sc;
+            // killall
+            sc = new TSOS.ShellCommand(this.shellKillAll, "killall", "- Kills all currently running processes.");
+            this.commandList[this.commandList.length] = sc;
+            // quantum <integer>
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "<integer> - Sets the Round Robin scheduler's quantum.");
             this.commandList[this.commandList.length] = sc;
             // brick <string>
             sc = new TSOS.ShellCommand(this.shellBrick, "brick", "<string> - Triggers the fatal error response. Optional custom message.");
@@ -316,15 +334,15 @@ var TSOS;
             // _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
             // _ProcessList[_ProcessCounter-1].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
             // }
-            if (_Scheduler.isFull()) {
-                if (!(_ProcessList[_ResidentList[0]].completed) && !(_ProcessList[_ResidentList[0]].rewrite)) {
-                    _StdOut.putText("Warning: Memory is currently full. Load again to overwrite the program in segment 0.");
-                    _ProcessList[_ResidentList[0]].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
-                }
+            if (_Scheduler.isFull() && (!(_ProcessList[_ResidentList[0]].completed) && !(_ProcessList[_ResidentList[0]].rewrite))) {
+                _StdOut.putText("Warning: Memory is currently full. Load again to overwrite the program in segment 0.");
+                _ProcessList[_ResidentList[0]].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
             }
             else {
-                if (_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter - 1].completed) && _ProcessList[_ProcessCounter - 1].rewrite) { // Even if it wasn't used, though, each PCB should be marked as completed when wiped. Otherwise, an invalid process could be run.
-                    _ProcessList[_ProcessCounter - 1].completed = true;
+                if (_ResidentList[0] >= 0) { // Even if it wasn't used, though, each PCB should be properly disposed of when wiped. Otherwise, an invalid process could be run.
+                    if (_ProcessList[_ResidentList[0]].rewrite) {
+                        _Scheduler.endProcess(_ResidentList[0]);
+                    }
                 }
                 // Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
                 var a = document.getElementById("taProgramInput").value;
@@ -401,7 +419,96 @@ var TSOS;
                 _StdOut.putText("Please enter a valid PID!");
             }
         }
-        //Kill them all. Every last one of them.
+        // Runs all programs in memory.
+        shellRunAll(args) {
+            for (var i = 0; i <= MEM_SEGMENTS; i++) {
+                var pid = _ResidentList[i];
+                if (pid >= 0) {
+                    _Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
+                    _StdOut.putText("Readied Process " + pid); // Inform the user that the process is ready
+                    _StdOut.advanceLine();
+                }
+            }
+            if (_ReadyList.isEmpty()) {
+                _StdOut.putText("There are no processes currently loaded!"); // Inform the user that they need to load a program first
+                _StdOut.advanceLine();
+            }
+            else {
+                _StdOut.putText("Beginning program execution"); // Inform the user that execution is beginning
+                _StdOut.advanceLine();
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // Prep the dispatcher
+                _CPU.isExecuting = true; // The CPU is now beginning execution.
+            }
+        }
+        // Clears all the memory at once.
+        shellClearMem(args) {
+            if (_CPU.isExecuting) {
+                _StdOut.putText("Programs are currently running, please wait for completion.");
+                _StdOut.advanceLine();
+            }
+            else {
+                for (var i = 0; i <= MEM_SEGMENTS; i++) {
+                    if (_ResidentList[i] >= 0) {
+                        _Scheduler.endProcess(_ResidentList[i]);
+                    }
+                }
+                _MemoryManager.clear();
+                _StdOut.putText("Memory fully cleared.");
+                _StdOut.advanceLine();
+            }
+        }
+        shellPs(args) {
+            _StdOut.putText("Current processes:"); // Print a header to the table
+            _StdOut.advanceLine();
+            for (var i = 0; i <= MEM_SEGMENTS; i++) {
+                if (_ResidentList[i] >= 0) {
+                    _StdOut.putText("Process " + _ResidentList[i] + " - Status: " + _ProcessList[_ResidentList[i]].State.toString()); // Print the PID of each resident process and its state
+                    _StdOut.advanceLine();
+                }
+            }
+        }
+        // Kill a specific running process
+        shellKill(args) {
+            var pid = parseInt(args[0], 10);
+            if (pid < _ProcessCounter && pid >= 0) {
+                if (_ProcessList[pid].State == "running" || _ProcessList[pid].State == "ready") {
+                    if (pid == _CurrentProcess) { // If we're killing the current process, 
+                        _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // Then log an interrupt for the scheduler to find a new process for us next cycle.
+                    }
+                    _Scheduler.endProcess(pid); // Tell the scheduler that the process is done now.
+                }
+                else {
+                    _StdOut.putText("That process is not running!");
+                }
+            }
+            else {
+                _StdOut.putText("Please enter a valid PID!");
+            }
+        }
+        // Kill all currently running processes
+        shellKillAll(args) {
+            var pid;
+            while (!_ReadyList.isEmpty()) { // For every object in the Ready List
+                pid = _ReadyList.dequeue(); // Remove it
+                _Scheduler.endProcess(pid); // Tell the scheduler that the process is done now.
+            }
+            if (_CurrentProcess >= 0) { // If something's still running (which it should be), it won't be on the Ready List. We kill it separately here.
+                _Scheduler.endProcess(_CurrentProcess);
+            }
+            _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // After we're done, tell the scheduler to check its notes, where it will realize it has nothing left to execute and put the CPU to sleep.
+        }
+        // Adjusts the number of cycles each process gets to hog the processor for
+        shellQuantum(args) {
+            var quant = parseInt(args[0], 10);
+            if (quant >= 1) {
+                _Scheduler.quantum = quant;
+            }
+            else {
+                _StdOut.putText("Please enter a valid integer above 1!");
+                _StdOut.advanceLine();
+            }
+        }
+        // Kill them all. Every last one of them.
         shellBrick(args) {
             var msg = "Manual";
             if (args.length > 0) {

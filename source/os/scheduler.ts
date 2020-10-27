@@ -30,9 +30,8 @@ module TSOS {
 		
 		public freeSeg(segment): void {
 			if(_ResidentList[segment] != -1) {
-				_ProcessList[_ResidentList[segment]].State = "terminated";
+				this.endProcess(_ResidentList[segment]);
 			}
-			_ResidentList[segment] = -1;
 			_MemoryManager.clearSeg(segment);
 		}
 		
@@ -50,11 +49,20 @@ module TSOS {
 			if(pid == _CurrentProcess) {
 				_CurrentProcess = -1;
 			}
+			if(_ReadyList.includes(pid)) {
+				var val = _ReadyList.dequeue();
+				while(val != pid) {
+					_ReadyList.enqueue(val);
+					val = _ReadyList.dequeue();
+				}
+			}
 		}
 		
 		public readyProcess(pid): void {
-			_ReadyList.enqueue(pid);
-			_ProcessList[pid].State = "ready";
+			if(pid>=0){
+				_ReadyList.enqueue(pid);
+				_ProcessList[pid].State = "ready";
+			}
 		}
 		
 		public nextProcess(): number { // This method finds and returns the next process to run.

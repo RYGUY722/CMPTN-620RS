@@ -19,6 +19,9 @@ var TSOS;
         isEmpty() {
             return (this.q.length == 0);
         }
+        includes(value) {
+            return this.q.includes(value);
+        }
         enqueue(element) {
             this.q.push(element);
         }
