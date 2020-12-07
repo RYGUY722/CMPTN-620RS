@@ -6,9 +6,7 @@ var TSOS;
             this.memory = memory;
         }
         init() {
-            for (var i = 0; i < MEM_MAXIMUM_SIZE; i++) {
-                this.memory[i] = "00";
-            }
+            this.memory.fill("00");
         }
     }
     TSOS.Memory = Memory;

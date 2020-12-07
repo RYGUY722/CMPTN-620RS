@@ -15,14 +15,17 @@ const APP_NAME: string    = "OntOS";   // A third of the Trinity
 const APP_VERSION: string = "20.X.1";   // The year is 20XX, everyone plays Fox...
 
 const CPU_CLOCK_INTERVAL: number = 100;   // This is in ms (milliseconds) so 1000 = 1 second.
+const DEFAULT_QUANTUM: number = 6; // The default time each process gets to run.
 
 const MEM_SEGMENT_SIZE: number = 256; // The size of a memory segment code is allowed to occupy.
-const MEM_MAXIMUM_SIZE: number = MEM_SEGMENT_SIZE*1; // Please place the number of desired memory segments as the number within this constant.
+const MEM_SEGMENTS: number = 3; // Please place the number of desired memory segments as the number within this constant.
+const MEM_MAXIMUM_SIZE: number = MEM_SEGMENT_SIZE*MEM_SEGMENTS; // The full memory size
 
 const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
 const PROGRAM_IRQ: number = 2;
+const SCHEDULER_IRQ: number = 3;
 
 
 //
@@ -34,8 +37,11 @@ const PROGRAM_IRQ: number = 2;
 var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
 var _Memory: TSOS.Memory;
 var _MemoryAccessor: TSOS.MemoryAccessor;
+
 // Software
 var _MemoryManager:any=null;
+
+var _Scheduler:any=null;
 
 var _OSclock: number = 0;  // Page 23.
 
@@ -57,8 +63,10 @@ var _KernelBuffers = null;
 
 // Processes
 var _ProcessCounter: number = 0;
-var _CurrentProcess: number;
+var _CurrentProcess: number = -1;
 var _ProcessList: TSOS.ProcessControlBlock[] = new Array();
+var _ResidentList: number[] = new Array(MEM_SEGMENTS);
+var _ReadyList: TSOS.Queue = null;
 
 // Standard input and output
 var _StdIn:  TSOS.Console = null; 

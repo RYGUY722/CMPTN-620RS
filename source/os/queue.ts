@@ -20,6 +20,10 @@ module TSOS {
         public isEmpty(){
             return (this.q.length == 0);
         }
+		
+		public includes(value) {
+			return this.q.includes(value);
+		}
 
         public enqueue(element) {
             this.q.push(element);

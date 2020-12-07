@@ -8,9 +8,7 @@ module TSOS {
         }
 
         public init(): void {
-            for(var i = 0; i < MEM_MAXIMUM_SIZE; i++){
-				this.memory[i]="00";
-			}
+            this.memory.fill("00");
         }
 	}
 }

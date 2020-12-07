@@ -27,6 +27,7 @@
    <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
    <script type="text/javascript" src="distrib/os/processControlBlock.js"></script>
    <script type="text/javascript" src="distrib/os/queue.js"></script>
+   <script type="text/javascript" src="distrib/os/scheduler.js"></script>
    <script type="text/javascript" src="distrib/os/shell.js"></script>
    <script type="text/javascript" src="distrib/os/shellCommand.js"></script>
    <script type="text/javascript" src="distrib/os/userCommand.js"></script>
@@ -35,7 +36,7 @@
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip2.js"></script>
+   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip3.js"></script>
    
 </head>
 
@@ -99,40 +100,9 @@
              tabindex="4"
              onclick="TSOS.Control.hostBtnStep_click(this);">
    </div>
-
-   <div id="divConsole" style="margin:4px; width:500px; height:500px; float:left;">
-      <canvas id="display"
-              width="500px"
-              height="500px"
-              tabindex="3">
-      </canvas>
-   </div>
-
-   <div id="divLog" style="margin-left:520px;">
-      <label>
-         Host Log
-         <br>
-         <textarea name="taHostLog"
-                   id  ="taHostLog"
-                   rows="26"
-                   cols="48"
-         ></textarea>
-      </label>
-   </div>
-
-   <div id="divUserProgramInput" style="margin-left:520px;">
-      <label>
-         User Program Input
-         <br>
-         <textarea name="taProgramInput"
-                   id  ="taProgramInput"
-                   rows="8"
-                   cols="48"
-         ></textarea>
-      </label>
-   </div>
    
-   <div id="divMemoryTracker" style="margin-left:520px;">
+   <div id="divTrackers" style="float:left;">
+      <div id="divMemoryTracker">
       <label>
          Memory Tracker
          <br>
@@ -142,7 +112,7 @@
       </label>
    </div>
    
-   <div id="divCPUInfo" style="margin-left:520px;">
+   <div id="divCPUInfo">
       <label>
          Current CPU Status
          <br>
@@ -173,18 +143,29 @@
       </label>
    </div>
    
-   <div id="divPCBInfo" style="margin-left:520px;">
+   <input type="button"
+             id = "btnProcessView"
+             name="brnProcessView"
+             class="normal_button"
+             disabled="disabled"
+             value="Showing: All"
+             tabindex="3"
+             onclick="TSOS.Control.hostBtnProcessView_click(this);">
+			 
+   <div id="divPCBInfo">
       <label>
          Current PCB Status
          <br>
          <table id="tbPCB">
             <thead>
                <tr>
+                  <th>PID</th>
                   <th>PC</th>
                   <th>Acc</th>
                   <th>Xreg</th>
                   <th>Yreg</th>
                   <th>Zflag</th>
+				  <th>State</th>
 				  <th>Done</th>
                </tr>
             </thead>
@@ -192,6 +173,64 @@
             </tbody>
          </table>
       </label>
+   </div>
+   
+   <div id="divReadyInfo" style="display:none;">
+      <label>
+         Current Ready Queue
+         <br>
+         <table id="tbReady">
+            <thead>
+               <tr>
+                  <th>PID</th>
+                  <th>PC</th>
+                  <th>Acc</th>
+                  <th>Xreg</th>
+                  <th>Yreg</th>
+                  <th>Zflag</th>
+				  <th>State</th>
+				  <th>Done</th>
+               </tr>
+            </thead>
+            <tbody>
+            </tbody>
+         </table>
+      </label>
+   </div>
+   </div>
+
+   <div id="divConsole" style="margin:10px; width:500px; height:500px; float:left;">
+      <canvas id="display"
+              width="500px"
+              height="500px"
+              tabindex="3">
+      </canvas>
+   </div>
+
+<div id="divLogIn">
+   <div id="divLog" style="margin-left:890px;">
+      <label>
+         Host Log
+         <br>
+         <textarea name="taHostLog"
+                   id  ="taHostLog"
+                   rows="26"
+                   cols="48"
+         ></textarea>
+      </label>
+   </div>
+
+   <div id="divUserProgramInput" style="margin-left:890px;">
+      <label>
+         User Program Input
+         <br>
+         <textarea name="taProgramInput"
+                   id  ="taProgramInput"
+                   rows="8"
+                   cols="48"
+         ></textarea>
+      </label>
+   </div>
    </div>
 </div>
 

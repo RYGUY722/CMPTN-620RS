@@ -31,6 +31,11 @@ module TSOS {
 			
 			// Start the memory manager
 			_MemoryManager = new MemoryManager();
+			
+			// Load the scheduler and its ready queue
+			_Scheduler = new Scheduler();
+			_Scheduler.init();
+			_ReadyList = new Queue();
 
             // Load the Keyboard Device Driver
             this.krnTrace("Loading the keyboard device driver.");
@@ -93,7 +98,11 @@ module TSOS {
                 var interrupt = _KernelInterruptQueue.dequeue();
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
-                _CPU.cycle();
+				_CPU.cycle();
+				_Scheduler.currentCycle++;
+				if(_Scheduler.currentCycle>=_Scheduler.quantum){ // Check if enough time has passed for the process to be switched
+					_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null));
+				}
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
@@ -138,12 +147,15 @@ module TSOS {
 					}
 					else if(_CPU.Xreg == 2){
 						var addr = _CPU.Yreg;
-						while(_MemoryAccessor.read(addr) != "00") {
-							var lettercode = parseInt(_MemoryAccessor.read(addr), 16);
+						while(_MemoryManager.read(_ProcessList[_CurrentProcess].Segment, addr) != "00") {
+							var lettercode = parseInt(_MemoryManager.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
 							_StdOut.putText(String.fromCharCode(lettercode));
 							addr++;
 						}
 					}
+					break;
+				case SCHEDULER_IRQ:                   // Interrupt from the scheduler to begin or switch processes.
+					this.krnDispatchNewProcess(_Scheduler.nextProcess());
 					break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");
@@ -212,5 +224,20 @@ module TSOS {
 			}
             this.krnShutdown();
         }
+		
+		public krnDispatchNewProcess(pid) {
+			if(pid!=-1) { // If the PID the scheduler returned was -1, then all processes are completed and we should not attempt to context switch or begin a process.
+				_Kernel.krnTrace("Switching processes"); // Inform the user.
+				if(_CurrentProcess>=0) { // Save the old data and change the process state, but only if we were already executing a process before.
+					_ProcessList[_CurrentProcess].save();
+					_ProcessList[_CurrentProcess].State = "ready";
+				}
+				_CurrentProcess = pid; // Make sure the current process is equal to whatever the scheduler wants it to be,
+				_ProcessList[_CurrentProcess].State = "running"; // and that its state is running.
+				
+				_CPU.load(); // Then, tell the CPU to load the data for the new process
+			}
+			_Scheduler.currentCycle = 0;
+		}
     }
 }

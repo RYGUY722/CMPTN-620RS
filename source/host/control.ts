@@ -81,6 +81,7 @@ module TSOS {
             (<HTMLButtonElement>document.getElementById("btnHaltOS")).disabled = false;
             (<HTMLButtonElement>document.getElementById("btnReset")).disabled = false;
             (<HTMLButtonElement>document.getElementById("btnModeChange")).disabled = false;
+            (<HTMLButtonElement>document.getElementById("btnProcessView")).disabled = false;
 
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
@@ -146,11 +147,25 @@ module TSOS {
             Devices.hostClockPulse();
         }
 		
+		public static hostBtnProcessView_click(btn): void { // Switches the view between the ready queue and all PCBs.
+            if(document.getElementById("divPCBInfo").style.display == "none") {
+				document.getElementById("divPCBInfo").style.display = "block";
+				document.getElementById("divReadyInfo").style.display = "none";
+				(<HTMLButtonElement>document.getElementById("btnProcessView")).value = "Showing: All";
+			}
+			else {
+				document.getElementById("divPCBInfo").style.display = "none";
+				document.getElementById("divReadyInfo").style.display = "block";
+				(<HTMLButtonElement>document.getElementById("btnProcessView")).value = "Showing: Ready";
+			}
+        }
+		
 		public static updateDisplays(): void { // A compilation method of all the methods that update displays on the OS page, to make it simpler and quicker to call.
 			Control.updateDate();
 			Control.updateMemory();
 			Control.updateCPUStatus();
 			Control.updatePCBStatus();
+			Control.updateReadyDisplay();
 		}
 		
 		public static updateDate(): void { // Updates the taskbar date display
@@ -163,11 +178,11 @@ module TSOS {
             var newtab = document.createElement('tbody');
 			for(var i = 0; i < MEM_MAXIMUM_SIZE; i+=8) {
 				var row = newtab.insertRow(-1);
-				var addrstr = i.toString(16).toUpperCase(); // To display the memory address, I turn i into a hexadecimal string. For clarity, I broke it up into a new variable.
+				var addrstr = (i % MEM_SEGMENT_SIZE).toString(16).toUpperCase(); // To display the memory address, I turn i into a hexadecimal string. For clarity, I broke it up into a new variable.
 				while(addrstr.length<3){ // To make it look good, I want all addresses to be the same size. I didn't want to do all that in a single line, this is clearer.
 					addrstr = "0" + addrstr;
 				}
-				row.insertCell(-1).innerHTML = ("0x" + addrstr);
+				row.insertCell(-1).innerHTML = (Math.floor(i/MEM_SEGMENT_SIZE) + "x" + addrstr);
 				for(var c = 0; c < 8; c++) {
 					var memval = _MemoryAccessor.read(i+c);
 					memval = memval.toString();
@@ -193,19 +208,63 @@ module TSOS {
 			var table = (<HTMLTableElement>document.getElementById("tbPCB"));
 			while(_ProcessCounter>=table.rows.length){
 				var newrow = table.insertRow(-1);
-				for(var i = 0; i < 6; i++) {
+				for(var i = 0; i < 8; i++) {
 					newrow.insertCell(-1);
 				}
 			}
 			for(var i = 0; i < _ProcessCounter; i++){
 				var row = table.rows[(i+1)];
-				row.cells[0].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
-				row.cells[1].innerHTML = _ProcessList[i].Acc.toString(16).toUpperCase();
-				row.cells[2].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
-				row.cells[3].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
-				row.cells[4].innerHTML = _ProcessList[i].Zflag.toString();
-				row.cells[5].innerHTML = _ProcessList[i].completed.toString();
+				row.cells[0].innerHTML = _ProcessList[i].PID.toString();
+				row.cells[1].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
+				row.cells[2].innerHTML = _ProcessList[i].Acc.toString(16).toUpperCase();
+				row.cells[3].innerHTML = _ProcessList[i].Xreg.toString(16).toUpperCase();
+				row.cells[4].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
+				row.cells[5].innerHTML = _ProcessList[i].Zflag.toString();
+				row.cells[6].innerHTML = _ProcessList[i].State.toString();
+				row.cells[7].innerHTML = _ProcessList[i].completed.toString();
 			}
+		}
+		
+		public static updateReadyDisplay(): void { // Updates the Ready Queue display table
+			var table = (<HTMLTableElement>document.getElementById("tbReady"));
+			var new_tbody = document.createElement('tbody');
+			var qString = _ReadyList.toString();
+			qString = qString.substring(1, qString.length-2);
+			var qArr = qString.split("] [");
+			if(qArr[0] == "") {qArr = new Array();} // There was an error where qArr was getting 1 index set to just "" which caused the lower for loop to blow up.
+			while(qArr.length-1>=new_tbody.rows.length){
+				var newrow = new_tbody.insertRow(-1);
+				for(var i = 0; i < 8; i++) {
+					newrow.insertCell(-1);
+				}
+			}
+			for(var i = 0; i < qArr.length; i++){
+				var row = new_tbody.rows[i];
+				row.cells[0].innerHTML = _ProcessList[parseInt(qArr[i],10)].PID.toString();
+				row.cells[1].innerHTML = _ProcessList[parseInt(qArr[i],10)].PC.toString(16).toUpperCase();
+				row.cells[2].innerHTML = _ProcessList[parseInt(qArr[i],10)].Acc.toString(16).toUpperCase();
+				row.cells[3].innerHTML = _ProcessList[parseInt(qArr[i],10)].Xreg.toString(16).toUpperCase();
+				row.cells[4].innerHTML = _ProcessList[parseInt(qArr[i],10)].Yreg.toString(16).toUpperCase();
+				row.cells[5].innerHTML = _ProcessList[parseInt(qArr[i],10)].Zflag.toString();
+				row.cells[6].innerHTML = _ProcessList[parseInt(qArr[i],10)].State.toString();
+				row.cells[7].innerHTML = _ProcessList[parseInt(qArr[i],10)].completed.toString();
+			}
+			
+			if(_CurrentProcess>=0) {
+				var row = new_tbody.insertRow(-1);
+				for(var i = 0; i < 8; i++) {
+					row.insertCell(-1);
+				}
+				row.cells[0].innerHTML = _ProcessList[_CurrentProcess].PID.toString();
+				row.cells[1].innerHTML = _ProcessList[_CurrentProcess].PC.toString(16).toUpperCase();
+				row.cells[2].innerHTML = _ProcessList[_CurrentProcess].Acc.toString(16).toUpperCase();
+				row.cells[3].innerHTML = _ProcessList[_CurrentProcess].Xreg.toString(16).toUpperCase();
+				row.cells[4].innerHTML = _ProcessList[_CurrentProcess].Yreg.toString(16).toUpperCase();
+				row.cells[5].innerHTML = _ProcessList[_CurrentProcess].Zflag.toString();
+				row.cells[6].innerHTML = _ProcessList[_CurrentProcess].State.toString();
+				row.cells[7].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
+			}
+			table.replaceChild(new_tbody, table.tBodies[0]);
 		}
     }
 }

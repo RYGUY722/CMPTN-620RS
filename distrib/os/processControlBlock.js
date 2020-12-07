@@ -1,8 +1,11 @@
 var TSOS;
 (function (TSOS) {
     class ProcessControlBlock {
-        constructor(PID = _ProcessCounter, PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, completed = false, rewrite = false) {
+        constructor(PID = _ProcessCounter, Segment = -1, State = "new", // New, waiting, ready, running, terminated
+        PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, completed = false, rewrite = false) {
             this.PID = PID;
+            this.Segment = Segment;
+            this.State = State;
             this.PC = PC;
             this.Acc = Acc;
             this.Xreg = Xreg;
