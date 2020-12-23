@@ -156,7 +156,7 @@ var TSOS;
                 }
                 row.insertCell(-1).innerHTML = (Math.floor(i / MEM_SEGMENT_SIZE) + "x" + addrstr);
                 for (var c = 0; c < 8; c++) {
-                    var memval = _MemoryAccessor.read(i + c);
+                    var memval = _MemoryAccessor.readDirect(i + c);
                     memval = memval.toString();
                     row.insertCell(-1).innerHTML = memval.toUpperCase();
                 }
@@ -168,7 +168,7 @@ var TSOS;
             var row = table.rows[1];
             row.cells[0].innerHTML = _CPU.isExecuting.toString();
             row.cells[1].innerHTML = _CPU.PC.toString(16).toUpperCase();
-            row.cells[2].innerHTML = _MemoryAccessor.read(_CPU.PC);
+            row.cells[2].innerHTML = _MemoryAccessor.readDirect(_CPU.PC);
             row.cells[3].innerHTML = _CPU.Acc.toString(16).toUpperCase();
             row.cells[4].innerHTML = _CPU.Xreg.toString(16).toUpperCase();
             row.cells[5].innerHTML = _CPU.Yreg.toString(16).toUpperCase();

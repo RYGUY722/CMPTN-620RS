@@ -17,6 +17,10 @@ const DEFAULT_QUANTUM = 6; // The default time each process gets to run.
 const MEM_SEGMENT_SIZE = 256; // The size of a memory segment code is allowed to occupy.
 const MEM_SEGMENTS = 3; // Please place the number of desired memory segments as the number within this constant.
 const MEM_MAXIMUM_SIZE = MEM_SEGMENT_SIZE * MEM_SEGMENTS; // The full memory size
+const HDD_TRACKS = 3;
+const HDD_SECTORS = 7;
+const HDD_BLOCKS = 7;
+const HDD_BLOCK_SIZE = 64;
 const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ = 1;
