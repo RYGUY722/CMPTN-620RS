@@ -413,7 +413,7 @@ module TSOS {
 		}
 		
 		// Loads the code from the User Program Input field.
-		shellLoad(args: string[]) { 
+		public shellLoad(args: string[]) { 
 			// First, check if there's an uncompleted program in memory. Right now, only one program can be in memory, so check the last one.
 			// if(_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter-1].completed) && !(_ProcessList[_ProcessCounter-1].rewrite)){
 				// _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
