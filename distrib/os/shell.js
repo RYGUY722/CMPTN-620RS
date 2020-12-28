@@ -87,6 +87,30 @@ var TSOS;
             // kos-mos
             sc = new TSOS.ShellCommand(this.shellKos, "kosmos", "- Generates a random number to see if you get Kos-mos in Xenoblade 2.");
             this.commandList[this.commandList.length] = sc;
+            // format <mode>
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "<mode> - Formats HTML session storage to create and clear the disk.");
+            this.commandList[this.commandList.length] = sc;
+            // create <string>
+            sc = new TSOS.ShellCommand(this.shellCreate, "create", "<string> - Creates a file with the given filename.");
+            this.commandList[this.commandList.length] = sc;
+            // write <string> <string>
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "<string> - writes the text to the file with the given filename.");
+            this.commandList[this.commandList.length] = sc;
+            // view <string>
+            sc = new TSOS.ShellCommand(this.shellView, "view", "<string> - Prints the contents of the file with the given filename.");
+            this.commandList[this.commandList.length] = sc;
+            // ls <string>
+            sc = new TSOS.ShellCommand(this.shellList, "ls", "<mode> - Returns all filenames. Use -l to view hidden files.");
+            this.commandList[this.commandList.length] = sc;
+            // delete <string>
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "<string> - Deletes the file with the given filename.");
+            this.commandList[this.commandList.length] = sc;
+            // setschedule <rr|fcfs|priority>
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "<rr|fcfs|priority> - Sets the scheduler algorithm.");
+            this.commandList[this.commandList.length] = sc;
+            // getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "- Returns the current scheduler algorithm.");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -329,15 +353,11 @@ var TSOS;
         }
         // Loads the code from the User Program Input field.
         shellLoad(args) {
-            // First, check if there's an uncompleted program in memory. Right now, only one program can be in memory, so check the last one.
-            // if(_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter-1].completed) && !(_ProcessList[_ProcessCounter-1].rewrite)){
-            // _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
-            // _ProcessList[_ProcessCounter-1].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
-            // }
-            if (_Scheduler.isFull() && (!(_ProcessList[_ResidentList[0]].completed) && !(_ProcessList[_ResidentList[0]].rewrite))) {
+            /* if(_Scheduler.isFull() && (!(_ProcessList[_ResidentList[0]].completed) && !(_ProcessList[_ResidentList[0]].rewrite))){
                 _StdOut.putText("Warning: Memory is currently full. Load again to overwrite the program in segment 0.");
                 _ProcessList[_ResidentList[0]].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
-            }
+            } */
+            if (false) { }
             else {
                 if (_ResidentList[0] >= 0) { // Even if it wasn't used, though, each PCB should be properly disposed of when wiped. Otherwise, an invalid process could be run.
                     if (_ProcessList[_ResidentList[0]].rewrite) {
@@ -380,15 +400,23 @@ var TSOS;
                     if (valid && (a.toLowerCase() == b.toString(16))) {
                         _StdOut.putText("The instruction set is valid."); // Give the user feedback that their code is accepted.
                         _StdOut.advanceLine();
-                        var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
-                        if (targetSeg == -1) {
-                            targetSeg = 0;
-                        } // If we got this far and there are no free segments, we're clearing and overwriting segment 0.
-                        _Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
-                        _MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
                         _ProcessList.push(new TSOS.ProcessControlBlock());
-                        _StdOut.putText("Process loaded into segment " + targetSeg);
-                        _StdOut.advanceLine();
+                        var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
+                        if (targetSeg == -1 && _Kernel.krnFileIO(0, [fin])) { // If there are no free segments, we'll try to load the code into storage.
+                            _Kernel.krnFileIO(7, [fin]);
+                            _ProcessList[_ProcessCounter].Location = "Disk";
+                            _StdOut.putText("Process loaded into storage.");
+                        }
+                        else { // Otherwise, we can just load it into memory.
+                            _Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
+                            _MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
+                            _StdOut.putText("Process loaded into segment " + targetSeg);
+                            _StdOut.advanceLine();
+                            _ProcessList[_ProcessCounter].Location = "Memory";
+                        }
+                        if (args.length > 0) { // All of this code is done anyways.
+                            _ProcessList[_ProcessCounter].priority = parseInt(args[0]);
+                        }
                         _StdOut.putText("New Process ID: " + _ProcessCounter);
                         _ProcessList[_ProcessCounter].Segment = targetSeg;
                         _Scheduler.addProcess(_ProcessCounter);
@@ -422,7 +450,7 @@ var TSOS;
         // Runs all programs in memory.
         shellRunAll(args) {
             for (var i = 0; i <= MEM_SEGMENTS; i++) {
-                var pid = _ResidentList[i];
+                var pid = _LoadedList[i];
                 if (pid >= 0) {
                     _Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
                     _StdOut.putText("Readied Process " + pid); // Inform the user that the process is ready
@@ -548,6 +576,87 @@ var TSOS;
                     _StdOut.putText("...Loser.");
                 }
             }
+        }
+        shellFormat(args) {
+            if (!_CPU.isExecuting) {
+                _StdOut.putText("Formatting the disk...");
+                _StdOut.advanceLine();
+                _Kernel.krnFileIO(0, args);
+            }
+            else {
+                _StdOut.putText("Currently executing programs. Please wait for completion before formatting.");
+            }
+        }
+        shellCreate(args) {
+            if (args.length < 1) { // We need a filename.
+                _StdOut.putText("Usage: create <string>  Please give a filename.");
+            }
+            else {
+                if (args[0].includes(".") || args[0].includes("\\") || args[0].includes("/") || args[0].includes("?") || args[0].includes("|") || args[0].includes(":") || args[0].includes("*") || args[0].includes("<") || args[0].includes(">")) {
+                    if (_SarcasticMode) {
+                        _StdOut.putText("You dumb fucking cretin, you fucking fool, absolute fucking buffoon, you bumbling idiot. Fuck you.");
+                        _StdOut.advanceLine();
+                    }
+                    _StdOut.putText("Filename contains illegal characters. Do not include: .\\/?|:*<>");
+                }
+                else {
+                    _Kernel.krnFileIO(1, args);
+                }
+            }
+        }
+        shellWrite(args) {
+            if (args.length < 2) { // We need a filename and contents.
+                _StdOut.putText("Usage: write <string> <string> Please give both a filename and file contents.");
+            }
+            else {
+                var pass = [args.shift(), args.shift()];
+                while (args.length > 0) {
+                    pass[1] = pass[1] + " " + args.shift();
+                }
+                _Kernel.krnFileIO(2, pass);
+            }
+        }
+        shellView(args) {
+            if (args.length < 1) { // We need a filename.
+                _StdOut.putText("Usage: view <string>  Please give a filename.");
+            }
+            else {
+                _Kernel.krnFileIO(3, args);
+            }
+        }
+        shellList(args) {
+            if (args.length < 1) { // We could or couldn't have an argument.
+                _Kernel.krnFileIO(4, ["0"]);
+            }
+            else {
+                if (args[0] == "-l") {
+                    _Kernel.krnFileIO(4, ["1"]);
+                }
+                else {
+                    _Kernel.krnFileIO(4, ["0"]);
+                }
+            }
+        }
+        shellDelete(args) {
+            if (args.length < 1) { // We need a filename.
+                _StdOut.putText("Usage: delete <string>  Please give a filename.");
+            }
+            else {
+                _Kernel.krnFileIO(5, args);
+            }
+        }
+        shellSetSchedule(args) {
+            if (args.length < 1) { // There is no input
+                _StdOut.putText("Usage: setschedule <rr|fcfs|priority>  Please choose a method.");
+            }
+            else if (args[0] == "rr" || args[0] == "fcfs" || args[0] == "priority") { // If the input is valid
+                _Scheduler.mode = args[0];
+            }
+            else { // There is input, but it is not one of the choices
+                _StdOut.putText("Usage: setschedule <rr|fcfs|priority>  Please choose a valid method.");
+            }
+        }
+        shellGetSchedule(args) {
         }
     }
     TSOS.Shell = Shell;

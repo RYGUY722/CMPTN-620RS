@@ -178,7 +178,7 @@ var TSOS;
             var table = document.getElementById("tbPCB");
             while (_ProcessCounter >= table.rows.length) {
                 var newrow = table.insertRow(-1);
-                for (var i = 0; i < 8; i++) {
+                for (var i = 0; i < 9; i++) {
                     newrow.insertCell(-1);
                 }
             }
@@ -191,7 +191,8 @@ var TSOS;
                 row.cells[4].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
                 row.cells[5].innerHTML = _ProcessList[i].Zflag.toString();
                 row.cells[6].innerHTML = _ProcessList[i].State.toString();
-                row.cells[7].innerHTML = _ProcessList[i].completed.toString();
+                row.cells[7].innerHTML = _ProcessList[i].Location.toString();
+                row.cells[8].innerHTML = _ProcessList[i].completed.toString();
             }
         }
         static updateReadyDisplay() {
@@ -205,7 +206,7 @@ var TSOS;
             } // There was an error where qArr was getting 1 index set to just "" which caused the lower for loop to blow up.
             while (qArr.length - 1 >= new_tbody.rows.length) {
                 var newrow = new_tbody.insertRow(-1);
-                for (var i = 0; i < 8; i++) {
+                for (var i = 0; i < 9; i++) {
                     newrow.insertCell(-1);
                 }
             }
@@ -218,11 +219,12 @@ var TSOS;
                 row.cells[4].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Yreg.toString(16).toUpperCase();
                 row.cells[5].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Zflag.toString();
                 row.cells[6].innerHTML = _ProcessList[parseInt(qArr[i], 10)].State.toString();
-                row.cells[7].innerHTML = _ProcessList[parseInt(qArr[i], 10)].completed.toString();
+                row.cells[7].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Location.toString();
+                row.cells[8].innerHTML = _ProcessList[parseInt(qArr[i], 10)].completed.toString();
             }
             if (_CurrentProcess >= 0) {
                 var row = new_tbody.insertRow(-1);
-                for (var i = 0; i < 8; i++) {
+                for (var i = 0; i < 9; i++) {
                     row.insertCell(-1);
                 }
                 row.cells[0].innerHTML = _ProcessList[_CurrentProcess].PID.toString();
@@ -232,7 +234,8 @@ var TSOS;
                 row.cells[4].innerHTML = _ProcessList[_CurrentProcess].Yreg.toString(16).toUpperCase();
                 row.cells[5].innerHTML = _ProcessList[_CurrentProcess].Zflag.toString();
                 row.cells[6].innerHTML = _ProcessList[_CurrentProcess].State.toString();
-                row.cells[7].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
+                row.cells[7].innerHTML = _ProcessList[_CurrentProcess].Location.toString();
+                row.cells[8].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
             }
             table.replaceChild(new_tbody, table.tBodies[0]);
         }

@@ -39,6 +39,7 @@ var _MemoryManager = null;
 var _Scheduler = null;
 var _OSclock = 0; // Page 23.
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
+var _HDDReady = false;
 var _Canvas; // Initialized in Control.hostInit().
 var _DrawingContext; // = _Canvas.getContext("2d");  // Assigned here for type safety, but re-initialized in Control.hostInit() for OCD and logic.
 var _DefaultFontFamily = "sans"; // Ignored, I think. The was just a place-holder in 2008, but the HTML canvas may have use for it.
@@ -56,6 +57,7 @@ var _CurrentProcess = -1;
 var _ProcessList = new Array();
 var _ResidentList = new Array(MEM_SEGMENTS);
 var _ReadyList = null;
+var _LoadedList = new Array();
 // Standard input and output
 var _StdIn = null;
 var _StdOut = null;
@@ -66,6 +68,7 @@ var _OsShell;
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver = null;
+var _krnHDDDriver = null;
 var _hardwareClockID = null;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .

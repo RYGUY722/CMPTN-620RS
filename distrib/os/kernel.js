@@ -35,6 +35,11 @@ var TSOS;
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+            // Load the Hard Disk Device Driver
+            this.krnTrace("Loading the HDD device driver.");
+            _krnHDDDriver = new TSOS.DeviceDriverHardDisk(); // Construct it.
+            _krnHDDDriver.driverEntry(); // Call the driverEntry() initialization routine.
+            this.krnTrace(_krnHDDDriver.status);
             //
             // ... more?
             //
@@ -83,7 +88,7 @@ var TSOS;
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
                 _CPU.cycle();
                 _Scheduler.currentCycle++;
-                if (_Scheduler.currentCycle >= _Scheduler.quantum) { // Check if enough time has passed for the process to be switched
+                if ((_Scheduler.currentCycle >= _Scheduler.quantum) && (_Scheduler.mode == "rr")) { // Check if enough time has passed for the process to be switched and that our scheduler mode is preemptive (ie, round robin).
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null));
                 }
             }
@@ -178,6 +183,100 @@ var TSOS;
                 }
             }
         }
+        krnFileIO(mode, args) {
+            if (!_HDDReady && mode != 0) {
+                _StdOut.putText("Disk not formatted. Please format disk first.");
+            }
+            else {
+                switch (mode) { // 0 = format, 1 = create, 2 = write, 3 = view, 4 = list, 5 = delete, 6 = create silently, 7 = write direct, 8 = view direct, 9 = find file, 0 = check file can fit on disk
+                    case 0:
+                        if (args[0] == "-full") {
+                            _krnHDDDriver.format(1);
+                        }
+                        else {
+                            _krnHDDDriver.format(0);
+                        }
+                        _StdOut.putText("Disk formatted.");
+                        _HDDReady = true;
+                        break;
+                    case 1:
+                        if (args[0].length > (HDD_BLOCK_SIZE - 4)) {
+                            _StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE - 4) + " characters or less.");
+                            break;
+                        }
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            _krnHDDDriver.create(args[0]);
+                            _StdOut.putText("Created file " + args[0]);
+                        }
+                        else {
+                            _StdOut.putText("File " + args[0] + " already exists.");
+                            this.krnFileIO(1, [args[0] + "(1)"]);
+                        }
+                        break;
+                    case 2:
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            _StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
+                            break;
+                        }
+                        _krnHDDDriver.writePlain(args[0], args[1]);
+                        _StdOut.putText("Wrote to file " + args[0] + ".");
+                        break;
+                    case 3:
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            _StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
+                            break;
+                        }
+                        _StdOut.putText(_krnHDDDriver.readPlain(args[0]));
+                        break;
+                    case 4:
+                        _krnHDDDriver.list(parseInt(args[0]));
+                        break;
+                    case 5:
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            _StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
+                            break;
+                        }
+                        _krnHDDDriver.deleteFile(args[0]);
+                        _StdOut.putText("File " + args[0] + " deleted.");
+                        break;
+                    case 6:
+                        if (args[0].length > (HDD_BLOCK_SIZE - 4)) {
+                            break;
+                        }
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            _krnHDDDriver.create(args[0]);
+                        }
+                        else {
+                            this.krnFileIO(1, [args[0] + "(1)"]);
+                        }
+                        break;
+                    case 7:
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            break;
+                        }
+                        _krnHDDDriver.write(args[0], args[1]);
+                        break;
+                    case 8:
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            break;
+                        }
+                        return _krnHDDDriver.read(args[0]);
+                        break;
+                    case 9:
+                        if (_krnHDDDriver.findFile(args[0]) == "-1") {
+                            return false;
+                            break;
+                        }
+                        return true;
+                        break;
+                    case 0:
+                        return _krnHDDDriver.canFit(args[0]);
+                        break;
+                    default:
+                        this.krnTrapError("Invalid File I/O operation. Mode = " + mode);
+                }
+            }
+        }
         krnTrapError(msg) {
             TSOS.Control.hostLog("OS ERROR - TRAP: " + msg);
             _StdOut.resetXY(); //Draw over the entire canvas with a filled blue rectangle
@@ -205,6 +304,9 @@ var TSOS;
                 if (_CurrentProcess >= 0) { // Save the old data and change the process state, but only if we were already executing a process before.
                     _ProcessList[_CurrentProcess].save();
                     _ProcessList[_CurrentProcess].State = "ready";
+                }
+                if (_ProcessList[pid].Segment == -1) { // If the new process is not in memory yet,
+                    _Scheduler.rollProcess(_CurrentProcess, pid); // Roll out the last process and roll in the new one.
                 }
                 _CurrentProcess = pid; // Make sure the current process is equal to whatever the scheduler wants it to be,
                 _ProcessList[_CurrentProcess].State = "running"; // and that its state is running.

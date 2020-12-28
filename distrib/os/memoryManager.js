@@ -5,9 +5,17 @@ var TSOS;
         init() { }
         load(code, segment) {
             var startByte = this.translateAddress(segment, 0);
-            for (let i = 0; i < code.length; i += 2) { // Write the user code into memory, byte by byte (yes, bytes are still 2 characters).
+            for (let i = 0; i < code.length && i < MEM_SEGMENT_SIZE; i += 2) { // Write the user code into memory, byte by byte (yes, bytes are still 2 characters).
                 _MemoryAccessor.writeDirect((startByte + i / 2), (code.charAt(i) + code.charAt(i + 1)));
             }
+        }
+        DMA(segment) {
+            var startByte = this.translateAddress(segment, 0);
+            var mem = "";
+            for (let i = 0; i < MEM_SEGMENT_SIZE; i++) { // Dump the contents of the segment into a string
+                mem += _MemoryAccessor.readDirect((startByte + i));
+            }
+            return mem; // Then return it.
         }
         clear() {
             _Memory.init();

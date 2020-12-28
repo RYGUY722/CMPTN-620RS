@@ -52,6 +52,8 @@ var _OSclock: number = 0;  // Page 23.
 
 var _Mode: number = 0;     // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
 
+var _HDDReady: boolean = false;
+
 var _Canvas: HTMLCanvasElement;          // Initialized in Control.hostInit().
 var _DrawingContext: any;                // = _Canvas.getContext("2d");  // Assigned here for type safety, but re-initialized in Control.hostInit() for OCD and logic.
 var _DefaultFontFamily: string = "sans"; // Ignored, I think. The was just a place-holder in 2008, but the HTML canvas may have use for it.
@@ -72,6 +74,7 @@ var _CurrentProcess: number = -1;
 var _ProcessList: TSOS.ProcessControlBlock[] = new Array();
 var _ResidentList: number[] = new Array(MEM_SEGMENTS);
 var _ReadyList: TSOS.Queue = null;
+var _LoadedList: number[] = new Array();
 
 // Standard input and output
 var _StdIn:  TSOS.Console = null; 
@@ -86,6 +89,7 @@ var _SarcasticMode: boolean = false;
 
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
+var _krnHDDDriver: TSOS.DeviceDriverHardDisk  = null;
 
 var _hardwareClockID: number = null;
 
