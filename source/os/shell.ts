@@ -523,24 +523,30 @@ module TSOS {
 						_StdOut.advanceLine();
 						
 						_ProcessList.push(new ProcessControlBlock());
+						_StdOut.putText("New Process ID: "+_ProcessCounter);
 						var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
-						if(targetSeg == -1 && _Kernel.krnFileIO(0, [fin])) { // If there are no free segments, we'll try to load the code into storage.
-							_Kernel.krnFileIO(7, [fin]);
-							_ProcessList[_ProcessCounter].Location = "Disk";
-							_StdOut.putText("Process loaded into storage.");
-						}
-						else { // Otherwise, we can just load it into memory.
+						if(targetSeg != -1) { // If a segment is free, we'll try to load it into there.
 							_Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
 							_MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
 							_StdOut.putText("Process loaded into segment "+targetSeg);
 							_StdOut.advanceLine();
 							_ProcessList[_ProcessCounter].Location = "Memory";
 						}
+						else { // If it was -1, there are no free segments and we have to load into storage.
+							if(_Kernel.krnFileIO(10, [fin])) { // Making sure the disk has enough space
+								_Kernel.krnFileIO(6, [".SWAP~"+_ProcessCounter]);
+								_Kernel.krnFileIO(7, [".SWAP~"+_ProcessCounter, fin]);
+								_ProcessList[_ProcessCounter].Location = "Disk";
+								_StdOut.putText("Process loaded into storage.");
+							}
+							else {
+								_StdOut.putText("No memory available. Loading failed.");
+							}
+						}
 						
 						if(args.length>0) { // All of this code is done anyways.
 							_ProcessList[_ProcessCounter].priority = parseInt(args[0]);
 						}
-						_StdOut.putText("New Process ID: "+_ProcessCounter);
 						_ProcessList[_ProcessCounter].Segment = targetSeg;
 						_Scheduler.addProcess(_ProcessCounter);
 						_ProcessCounter++;
@@ -797,7 +803,22 @@ module TSOS {
 		}
 		
 		public shellGetSchedule(args: string[]) {
-			
+			switch(_Scheduler.mode) {
+				case "rr":
+					_StdOut.putText("Scheduler mode: Round Robin.");
+					break;
+					
+				case "fcfs":
+					_StdOut.putText("Scheduler mode: First Come First Serve.");
+					break;
+					
+				case "priority":
+					_StdOut.putText("Scheduler mode: Priority.");
+					break;
+					
+				default: 
+					_StdOut.putText("Scheduler mode unknown or improperly set.");
+			}
 		}
 
     }

@@ -68,8 +68,8 @@ var TSOS;
                             nextLoc = this.findFreeLocation(1); // Find a new space for the next block,
                             diskspaceint--; // And decrement the disk space tracker as we just used a new block. Then,
                         }
-                        var chunk = contents.substr(0, (HDD_BLOCK_SIZE - 4)); // Get the data that will fit in this block,
-                        contents = contents.substring((HDD_BLOCK_SIZE - 4)); // Shred that from the existing string,
+                        var chunk = contents.substr(0, (2 * (HDD_BLOCK_SIZE - 4))); // Get the data that will fit in this block,
+                        contents = contents.substring((2 * (HDD_BLOCK_SIZE - 4))); // Shred that from the existing string,
                         sessionStorage.setItem(fileLoc, this.generateMessage(1, nextLoc, chunk)); // Set the current location to a newly generated message (This block is in use, nextLoc is the linked location, and chunk is the actual data),
                         fileLoc = nextLoc; // Move our file location to the next location.
                         contWrite = this.isTooLarge(contents); // Check if the remaining data is still too big for 1 block,
@@ -81,7 +81,7 @@ var TSOS;
                         var fullData = "";
                         var curLoc;
                         var data = "";
-                        while (nextLoc != "000") {
+                        while (this.inUse(sessionStorage.getItem(nextLoc)) && nextLoc != "000") {
                             fullData = sessionStorage.getItem(nextLoc);
                             curLoc = nextLoc;
                             nextLoc = this.getLink(fullData);

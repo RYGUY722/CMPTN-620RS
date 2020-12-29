@@ -269,8 +269,11 @@ var TSOS;
                         }
                         return true;
                         break;
-                    case 0:
-                        return _krnHDDDriver.canFit(args[0]);
+                    case 10:
+                        if (_krnHDDDriver.canFit(args[0])) {
+                            return true;
+                        }
+                        return false;
                         break;
                     default:
                         this.krnTrapError("Invalid File I/O operation. Mode = " + mode);

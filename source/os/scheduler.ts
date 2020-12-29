@@ -102,23 +102,32 @@ module TSOS {
 		}
 		
 		public rollProcess(pid1, pid2) {
-			// ROLL OUT PID1
-			var prog = _MemoryManager.DMA(_ProcessList[pid1].Segment);
-			if(!_Kernel.krnFileIO(9, [".SWAP~"+pid1])) { // If the swap file doesn't exist,
-				_Kernel.krnFileIO(6, [".SWAP~"+pid1]); // Make it.
+			var freeSeg;
+			// CHECK FOR FREE SEGMENT
+			if(_ResidentList.includes(-1)) {
+				freeSeg = _ResidentList.indexOf(-1);
 			}
-			_Kernel.krnFileIO(7, [".SWAP~"+pid1, prog]); // Then write the program to it.
+			
+			// ROLL OUT PID1
+			else{
+				var prog = _MemoryManager.DMA(_ProcessList[pid1].Segment);
+				if(!_Kernel.krnFileIO(9, [".SWAP~"+pid1])) { // If the swap file doesn't exist,
+					_Kernel.krnFileIO(6, [".SWAP~"+pid1]); // Make it.
+				}
+				_Kernel.krnFileIO(7, [".SWAP~"+pid1, prog]); // Then write the program to it.
+				freeSeg = _ProcessList[pid1].Segment;
+				_ProcessList[pid1].Segment = -1;
+				_ProcessList[pid1].Location = "Disk";
+			}
 			
 			// ROLL IN PID2
 			var newprog = _Kernel.krnFileIO(8, [".SWAP~"+pid2]).toString();
 			newprog = newprog.substr(0, MEM_SEGMENT_SIZE);
-			_MemoryManager.load(_ProcessList[pid1].Segment, newprog);
+			_MemoryManager.load(freeSeg, newprog);
 			
 			// UPDATE THE OTHER INFORMATION
-			_ProcessList[pid2].Segment = _ProcessList[pid1].Segment;
-			_ProcessList[pid1].Segment = -1;
+			_ProcessList[pid2].Segment = freeSeg;
 			_ProcessList[pid2].Location = "Memory";
-			_ProcessList[pid1].Location = "Disk";
 			_ResidentList[_ProcessList[pid2].Segment] = pid2;
 			
 		}
