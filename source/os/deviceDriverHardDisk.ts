@@ -56,6 +56,22 @@ module TSOS {
 			}
 		}
 		
+		public rename(filename, newfilename) { // This finds the file named filename and changes the filename to newfilename.
+			var filenamehex = this.translateToASCII(newfilename);
+			if(!this.isTooLarge(filenamehex)){
+				var fileLoc = this.findFile(filename);
+				if(fileLoc!="-1") {
+					var hexData = this.generateMessage(1,this.getLink(sessionStorage.getItem(fileLoc)),filenamehex);
+					sessionStorage.setItem(fileLoc,hexData);
+				}
+			}
+		}
+		
+		public copy(filename) { // This creates a copy of a file named filename, appending a (1) to the name.
+			this.create(filename+"(1)");
+			this.write(filename+"(1)",this.read(filename));
+		}
+		
 		public writePlain(filename, contents) { // This takes plaintext (e.g. user input), translates it, and writes it to the file.
 			this.write(filename, this.translateToASCII(contents));
 		}

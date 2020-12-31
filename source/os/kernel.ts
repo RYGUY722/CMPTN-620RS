@@ -74,6 +74,8 @@ module TSOS {
             // ... Disable the Interrupts.
             this.krnTrace("Disabling the interrupts.");
             this.krnDisableInterrupts();
+            // Stop the interval that's simulating our clock pulse.
+            clearInterval(_hardwareClockID);
             //
             // Unload the Device Drivers?
             // More?
@@ -209,12 +211,12 @@ module TSOS {
              }
         }
 		
-		public krnFileIO(mode, args: string[]) { // This edits the file system in some way. The mode is a number, and the operations are in the same order as in the shell.
+		public krnFileIO(mode, args: string[]) { // This edits the file system in some way. The mode is a number, and the operations are mostly in the same order as in the shell.
 			if(!_HDDReady && mode!=0) {
 				_StdOut.putText("Disk not formatted. Please format disk first.");
 			}
 			else {
-				switch (mode) { // 0 = format, 1 = create, 2 = write, 3 = view, 4 = list, 5 = delete, 6 = create silently, 7 = write direct, 8 = view direct, 9 = find file, 0 = check file can fit on disk
+				switch (mode) { // 0 = format, 1 = create, 2 = write, 3 = view, 4 = list, 5 = delete, 6 = create silently, 7 = write direct, 8 = view direct, 9 = delete silently, 10 = find file, 11 = check file can fit on disk, 12 = rename, 13 = copy
 					case 0:
 						if(args[0] == "-full") {
 							_krnHDDDriver.format(1);
@@ -288,24 +290,64 @@ module TSOS {
 						}
 						return _krnHDDDriver.read(args[0]);
 						break;
-					case 9:
+					case 9: 
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							break;
+						}
+						_krnHDDDriver.deleteFile(args[0]);
+						break;
+					case 10:
 						if(_krnHDDDriver.findFile(args[0]) == "-1") {
 							return false;
 							break;
 						}
 						return true;
 						break;
-					case 10:
+					case 11:
 						if(_krnHDDDriver.canFit(args[0])) {
 							return true;
 						}
 						return false;
+						break;
+					case 12: 
+						if(_krnHDDDriver.findFile(args[0]) != "-1") {
+							if(args[1].length>(HDD_BLOCK_SIZE-4)) {
+								_StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE-4) + " characters or less.");
+								break;
+							}
+							else {
+								_krnHDDDriver.rename(args[0], args[1]);
+								_StdOut.putText("File "+args[0]+" renamed to "+args[1]+".");
+								break;
+							}
+						}
+						_StdOut.putText("File "+args[0]+" not found.");
+						break;
+					case 13: 
+						if((args[0].length+3)>(HDD_BLOCK_SIZE-4)) {
+							_StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE-4) + " characters or less.");
+							break;
+						}
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_StdOut.putText("File "+args[0]+" not found.");
+							break;
+						}
+						else {
+							if(_krnHDDDriver.findFile(args[0]+"(1)") == "-1") {
+								_krnHDDDriver.copy(args[0]);
+								_StdOut.putText("File " + args[0] + " copied as " + args[0] + "(1).");
+							}
+							else{
+								this.krnFileIO(13, [args[0]+"(1)"]);
+							}
+						}
 						break;
 						
 					default:
 						this.krnTrapError("Invalid File I/O operation. Mode = " + mode);
 				}
 			}
+			Control.updateDiskDisplay();
 		}
 
         public krnTrapError(msg) {

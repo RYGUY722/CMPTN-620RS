@@ -59,8 +59,8 @@ var TSOS;
                     val = _ReadyList.dequeue();
                 }
             }
-            if (_Kernel.krnFileIO(9, [".SWAP~" + pid])) { // If there's a swap file on the drive,
-                _Kernel.krnFileIO(5, [".SWAP~" + pid]); // Delete it.
+            if (_Kernel.krnFileIO(10, [".SWAP~" + pid])) { // If there's a swap file on the drive,
+                _Kernel.krnFileIO(9, [".SWAP~" + pid]); // Delete it.
             }
             _Kernel.krnTrace("Process " + pid + " ended");
         }
@@ -95,8 +95,11 @@ var TSOS;
             }
             // ROLL OUT PID1
             else {
+                if (pid1 == -1) { // If the roll out PID is -1 (invalid), 
+                    pid1 = _ResidentList[0]; // Then just roll out whatever is in Segment 0.
+                }
                 var prog = _MemoryManager.DMA(_ProcessList[pid1].Segment);
-                if (!_Kernel.krnFileIO(9, [".SWAP~" + pid1])) { // If the swap file doesn't exist,
+                if (!_Kernel.krnFileIO(10, [".SWAP~" + pid1])) { // If the swap file doesn't exist,
                     _Kernel.krnFileIO(6, [".SWAP~" + pid1]); // Make it.
                 }
                 _Kernel.krnFileIO(7, [".SWAP~" + pid1, prog]); // Then write the program to it.

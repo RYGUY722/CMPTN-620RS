@@ -93,6 +93,12 @@ var TSOS;
             // create <string>
             sc = new TSOS.ShellCommand(this.shellCreate, "create", "<string> - Creates a file with the given filename.");
             this.commandList[this.commandList.length] = sc;
+            // rename <string> <string>
+            sc = new TSOS.ShellCommand(this.shellRename, "rename", "<string> <string> - Renames the file with the given filename to the new filename.");
+            this.commandList[this.commandList.length] = sc;
+            // copy <string>
+            sc = new TSOS.ShellCommand(this.shellCopy, "copy", "<string> - Copies the file with the given filename.");
+            this.commandList[this.commandList.length] = sc;
             // write <string> <string>
             sc = new TSOS.ShellCommand(this.shellWrite, "write", "<string> - writes the text to the file with the given filename.");
             this.commandList[this.commandList.length] = sc;
@@ -402,6 +408,7 @@ var TSOS;
                         _StdOut.advanceLine();
                         _ProcessList.push(new TSOS.ProcessControlBlock());
                         _StdOut.putText("New Process ID: " + _ProcessCounter);
+                        _StdOut.advanceLine();
                         var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
                         if (targetSeg != -1) { // If a segment is free, we'll try to load it into there.
                             _Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
@@ -411,11 +418,12 @@ var TSOS;
                             _ProcessList[_ProcessCounter].Location = "Memory";
                         }
                         else { // If it was -1, there are no free segments and we have to load into storage.
-                            if (_Kernel.krnFileIO(10, [fin])) { // Making sure the disk has enough space
+                            if (_Kernel.krnFileIO(11, [fin])) { // Making sure the disk has enough space
                                 _Kernel.krnFileIO(6, [".SWAP~" + _ProcessCounter]);
                                 _Kernel.krnFileIO(7, [".SWAP~" + _ProcessCounter, fin]);
                                 _ProcessList[_ProcessCounter].Location = "Disk";
                                 _StdOut.putText("Process loaded into storage.");
+                                _StdOut.advanceLine();
                             }
                             else {
                                 _StdOut.putText("No memory available. Loading failed.");
@@ -445,6 +453,9 @@ var TSOS;
                     _StdOut.putText("Beginning Process " + pid); // Inform the user that execution is beginning
                     _StdOut.advanceLine();
                     _Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
+                    if (_Scheduler.mode == "priority") { // If we're on priority mode, sort all the processes based on their priority.
+                        _ReadyList.prioritySort(0, _ReadyList.getSize() - 1);
+                    }
                     _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // Prep the dispatcher
                     _CPU.isExecuting = true; // The CPU is now beginning execution.
                 }
@@ -455,7 +466,7 @@ var TSOS;
         }
         // Runs all programs in memory.
         shellRunAll(args) {
-            for (var i = 0; i <= MEM_SEGMENTS; i++) {
+            for (var i = 0; i < _LoadedList.length; i++) {
                 var pid = _LoadedList[i];
                 if (pid >= 0) {
                     _Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
@@ -470,6 +481,9 @@ var TSOS;
             else {
                 _StdOut.putText("Beginning program execution"); // Inform the user that execution is beginning
                 _StdOut.advanceLine();
+                if (_Scheduler.mode == "priority") { // If we're on priority mode, sort all the processes based on their priority.
+                    _ReadyList.prioritySort(0, _ReadyList.getSize() - 1);
+                }
                 _KernelInterruptQueue.enqueue(new TSOS.Interrupt(SCHEDULER_IRQ, null)); // Prep the dispatcher
                 _CPU.isExecuting = true; // The CPU is now beginning execution.
             }
@@ -598,16 +612,41 @@ var TSOS;
                 _StdOut.putText("Usage: create <string>  Please give a filename.");
             }
             else {
-                if (args[0].includes(".") || args[0].includes("\\") || args[0].includes("/") || args[0].includes("?") || args[0].includes("|") || args[0].includes(":") || args[0].includes("*") || args[0].includes("<") || args[0].includes(">")) {
+                if (args[0].includes("~") || args[0].includes("\\") || args[0].includes("/") || args[0].includes("?") || args[0].includes("|") || args[0].includes(":") || args[0].includes("*") || args[0].includes("<") || args[0].includes(">")) {
                     if (_SarcasticMode) {
                         _StdOut.putText("You dumb fucking cretin, you fucking fool, absolute fucking buffoon, you bumbling idiot. Fuck you.");
                         _StdOut.advanceLine();
                     }
-                    _StdOut.putText("Filename contains illegal characters. Do not include: .\\/?|:*<>");
+                    _StdOut.putText("Filename contains illegal characters. Do not include: ~\\/?|:*<>");
                 }
                 else {
                     _Kernel.krnFileIO(1, args);
                 }
+            }
+        }
+        shellRename(args) {
+            if (args.length < 2) { // We need a filename.
+                _StdOut.putText("Usage: rename <string> <string>  Please give a filename and replacement filename.");
+            }
+            else {
+                if (args[1].includes("~") || args[1].includes("\\") || args[1].includes("/") || args[1].includes("?") || args[1].includes("|") || args[1].includes(":") || args[1].includes("*") || args[1].includes("<") || args[1].includes(">")) {
+                    if (_SarcasticMode) {
+                        _StdOut.putText("You dumb fucking cretin, you fucking fool, absolute fucking buffoon, you bumbling idiot. Fuck you.");
+                        _StdOut.advanceLine();
+                    }
+                    _StdOut.putText("Filename contains illegal characters. Do not include: ~\\/?|:*<>");
+                }
+                else {
+                    _Kernel.krnFileIO(12, args);
+                }
+            }
+        }
+        shellCopy(args) {
+            if (args.length < 1) { // We need a filename.
+                _StdOut.putText("Usage: copy <string>  Please give a filename.");
+            }
+            else {
+                _Kernel.krnFileIO(13, args);
             }
         }
         shellWrite(args) {
@@ -648,7 +687,16 @@ var TSOS;
                 _StdOut.putText("Usage: delete <string>  Please give a filename.");
             }
             else {
-                _Kernel.krnFileIO(5, args);
+                if (args[0].includes("~") || args[0].includes("\\") || args[0].includes("/") || args[0].includes("?") || args[0].includes("|") || args[0].includes(":") || args[0].includes("*") || args[0].includes("<") || args[0].includes(">")) {
+                    if (_SarcasticMode) {
+                        _StdOut.putText("You really thought I'd let you delete system files? In my realm??? Nerd.");
+                        _StdOut.advanceLine();
+                    }
+                    _StdOut.putText("Filename contains illegal characters. Do not include: ~\\/?|:*<>");
+                }
+                else {
+                    _Kernel.krnFileIO(5, args);
+                }
             }
         }
         shellSetSchedule(args) {
@@ -657,6 +705,7 @@ var TSOS;
             }
             else if (args[0] == "rr" || args[0] == "fcfs" || args[0] == "priority") { // If the input is valid
                 _Scheduler.mode = args[0];
+                _StdOut.putText("Mode changed");
             }
             else { // There is input, but it is not one of the choices
                 _StdOut.putText("Usage: setschedule <rr|fcfs|priority>  Please choose a valid method.");

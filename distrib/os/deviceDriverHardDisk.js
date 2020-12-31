@@ -50,6 +50,20 @@ var TSOS;
                 }
             }
         }
+        rename(filename, newfilename) {
+            var filenamehex = this.translateToASCII(newfilename);
+            if (!this.isTooLarge(filenamehex)) {
+                var fileLoc = this.findFile(filename);
+                if (fileLoc != "-1") {
+                    var hexData = this.generateMessage(1, this.getLink(sessionStorage.getItem(fileLoc)), filenamehex);
+                    sessionStorage.setItem(fileLoc, hexData);
+                }
+            }
+        }
+        copy(filename) {
+            this.create(filename + "(1)");
+            this.write(filename + "(1)", this.read(filename));
+        }
         writePlain(filename, contents) {
             this.write(filename, this.translateToASCII(contents));
         }

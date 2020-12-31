@@ -59,6 +59,8 @@ var TSOS;
         // Host Events
         //
         static hostBtnStartOS_click(btn) {
+            // Do a fancy animation, because we're cool...
+            document.body.style.background = "#000011 url(distrib/images/core_background.png) no-repeat fixed center";
             // Disable the (passed-in) start button...
             btn.disabled = true;
             // .. enable the Halt and Reset buttons ...
@@ -86,8 +88,6 @@ var TSOS;
             Control.hostLog("Attempting Kernel shutdown.", "host");
             // Call the OS shutdown routine.
             _Kernel.krnShutdown();
-            // Stop the interval that's simulating our clock pulse.
-            clearInterval(_hardwareClockID);
             // TODO: Is there anything else we need to do here?
         }
         static hostBtnReset_click(btn) {
@@ -154,7 +154,9 @@ var TSOS;
                 while (addrstr.length < 3) { // To make it look good, I want all addresses to be the same size. I didn't want to do all that in a single line, this is clearer.
                     addrstr = "0" + addrstr;
                 }
-                row.insertCell(-1).innerHTML = (Math.floor(i / MEM_SEGMENT_SIZE) + "x" + addrstr);
+                var th = document.createElement('th');
+                th.innerHTML = (Math.floor(i / MEM_SEGMENT_SIZE) + "x" + addrstr);
+                row.appendChild(th);
                 for (var c = 0; c < 8; c++) {
                     var memval = _MemoryAccessor.readDirect(i + c);
                     memval = memval.toString();
@@ -193,6 +195,12 @@ var TSOS;
                 row.cells[6].innerHTML = _ProcessList[i].State.toString();
                 row.cells[7].innerHTML = _ProcessList[i].Location.toString();
                 row.cells[8].innerHTML = _ProcessList[i].completed.toString();
+                if (i == _CurrentProcess) {
+                    row.style.backgroundColor = "yellow";
+                }
+                else {
+                    row.style.backgroundColor = "transparent";
+                }
             }
         }
         static updateReadyDisplay() {
@@ -223,7 +231,7 @@ var TSOS;
                 row.cells[8].innerHTML = _ProcessList[parseInt(qArr[i], 10)].completed.toString();
             }
             if (_CurrentProcess >= 0) {
-                var row = new_tbody.insertRow(-1);
+                var row = new_tbody.insertRow(0);
                 for (var i = 0; i < 9; i++) {
                     row.insertCell(-1);
                 }
@@ -236,8 +244,50 @@ var TSOS;
                 row.cells[6].innerHTML = _ProcessList[_CurrentProcess].State.toString();
                 row.cells[7].innerHTML = _ProcessList[_CurrentProcess].Location.toString();
                 row.cells[8].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
+                row.style.backgroundColor = "yellow";
             }
             table.replaceChild(new_tbody, table.tBodies[0]);
+        }
+        static updateDiskDisplay() {
+            var table = document.getElementById("tbStorage");
+            var newtab = document.createElement('tbody');
+            for (let x = 0; x < HDD_TRACKS; x++) {
+                for (let y = 0; y < HDD_SECTORS; y++) {
+                    for (let z = 0; z < HDD_BLOCKS; z++) {
+                        var row = newtab.insertRow(-1);
+                        var th = document.createElement('th');
+                        th.innerHTML = x + "," + y + "," + z;
+                        row.appendChild(th);
+                        var data = sessionStorage.getItem(x + "" + y + "" + z);
+                        var cell = row.insertCell(-1);
+                        if (data.substr(0, 1).toUpperCase() == "0") {
+                            cell.innerHTML = "Not In Use";
+                            cell.style.color = "red";
+                        }
+                        else {
+                            cell.innerHTML = "In Use";
+                            cell.style.color = "green";
+                        }
+                        row.appendChild(cell);
+                        cell = row.insertCell(-1);
+                        var datalink = data.substr(1, 3).toUpperCase();
+                        if (datalink == "000") {
+                            cell.innerHTML = "No Link";
+                            cell.style.color = "red";
+                        }
+                        else {
+                            datalink = datalink.charAt(0) + "," + datalink.charAt(1) + "," + datalink.charAt(2);
+                            cell.innerHTML = datalink;
+                        }
+                        row.appendChild(cell);
+                        var scrolldiv = document.createElement('div');
+                        scrolldiv.className = "scrollable";
+                        scrolldiv.innerHTML = data.substring(4).toUpperCase();
+                        row.insertCell(-1).appendChild(scrolldiv);
+                    }
+                }
+            }
+            table.replaceChild(newtab, table.tBodies[0]);
         }
     }
     TSOS.Control = Control;
