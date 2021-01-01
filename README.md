@@ -5,7 +5,8 @@ All lab questions can be found in the "questions" folder.
   
 **Project 1 branch:** Project1. 	Project 1 is done!  
 **Project 2 branch:** Project2.	  Project 2 is done!    
-**Project 3 branch:** Project3.	  Project 3 is done!    
+**Project 3 branch:** Project3.	  Project 3 is done!   
+**Project 4 branch:** Project4.	  Project 4 is done!    
 
 **UPDATE, 9/8/2020 1:43 AM:** I just realized I wasn't referencing a specific issue number in my commits.... Oops... I can't edit them now, but they all definitely say what was added and which issue was addressed, just in words, not numbers. Will be including numbers in future commits.
 

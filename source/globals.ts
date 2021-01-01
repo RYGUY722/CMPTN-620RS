@@ -21,7 +21,7 @@ const MEM_SEGMENT_SIZE: number = 256; // The size of a memory segment code is al
 const MEM_SEGMENTS: number = 3; // Please place the number of desired memory segments as the number within this constant.
 const MEM_MAXIMUM_SIZE: number = MEM_SEGMENT_SIZE*MEM_SEGMENTS; // The full memory size
 
-const HDD_TRACKS: number = 3;
+const HDD_TRACKS: number = 3; // These define the size of the Disk.
 const HDD_SECTORS: number = 7;
 const HDD_BLOCKS: number = 7;
 const HDD_BLOCK_SIZE: number = 64;

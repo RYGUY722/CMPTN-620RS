@@ -11,7 +11,7 @@ module TSOS {
 			_ResidentList.fill(-1);
 		}
 		
-		public isFull(): boolean {
+		public isFull(): boolean { // Returns a true or false value of if the memory is full
 			for(var i=0; i<=MEM_SEGMENTS; i++){
 				if(_ResidentList[i]==-1){
 					return false;
@@ -20,7 +20,7 @@ module TSOS {
 			return true;
 		}
 		
-		public getNextFreeSeg(): number {
+		public getNextFreeSeg(): number { // Returns the next segment that isn't in use
 			for(var i=0; i<=MEM_SEGMENTS; i++){
 				if(_ResidentList[i]==-1){
 					return i;
@@ -29,7 +29,7 @@ module TSOS {
 			return -1;
 		}
 		
-		public freeSeg(segment): void {
+		public freeSeg(segment): void { // Frees up a given segment, clearing the memory and associated process information
 			if(_ResidentList[segment] != -1) {
 				this.endProcess(_ResidentList[segment]);
 			}
@@ -37,7 +37,7 @@ module TSOS {
 			_Kernel.krnTrace("Cleared segment " + segment);
 		}
 		
-		public addProcess(pid): void { 
+		public addProcess(pid): void { // Adds a process into the loaded list and resident list (if applicable), and updates its state
 			_LoadedList.push(pid);
 			if(_ProcessList[pid].Segment != -1) {
 				_ResidentList[_ProcessList[pid].Segment] = pid;
@@ -46,7 +46,7 @@ module TSOS {
 			_Kernel.krnTrace("Process " + pid + " added");
 		}
 		
-		public endProcess(pid): void {
+		public endProcess(pid): void { // Ends the process and updates its associated information, removing it from the relevant lists and deleting its swap file
 			_ResidentList[_ProcessList[pid].Segment] = -1;
 			_ProcessList[pid].Segment = -1;
 			_ProcessList[pid].State = "terminated";
@@ -75,7 +75,7 @@ module TSOS {
 			_Kernel.krnTrace("Process " + pid + " ended");
 		}
 		
-		public readyProcess(pid): void {
+		public readyProcess(pid): void { // Adds a process into the ready list, prepping it to run.
 			if(pid>=0){
 				_ReadyList.enqueue(pid);
 				_ProcessList[pid].State = "ready";
@@ -101,7 +101,7 @@ module TSOS {
 			}
 		}
 		
-		public rollProcess(pid1, pid2) {
+		public rollProcess(pid1, pid2) { // Rolls out PID1 onto the storage drive (assuming PID1 is valid or and that there isn't free space in memory), then rolls in PID2.
 			var freeSeg;
 			// CHECK FOR FREE SEGMENT
 			if(_ResidentList.includes(-1)) {
@@ -121,6 +121,7 @@ module TSOS {
 				freeSeg = _ProcessList[pid1].Segment;
 				_ProcessList[pid1].Segment = -1;
 				_ProcessList[pid1].Location = "Disk";
+				_Kernel.krnTrace("Process " + pid1 + " moved into storage.");
 			}
 			
 			// ROLL IN PID2
@@ -132,6 +133,7 @@ module TSOS {
 			_ProcessList[pid2].Segment = freeSeg;
 			_ProcessList[pid2].Location = "Memory";
 			_ResidentList[_ProcessList[pid2].Segment] = pid2;
+			_Kernel.krnTrace("Process " + pid2 + " moved into memory.");
 			
 		}
 		

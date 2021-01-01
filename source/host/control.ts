@@ -161,7 +161,7 @@ module TSOS {
 			}
         }
 		
-		public static updateDisplays(): void { // A compilation method of all the methods that update displays on the OS page, to make it simpler and quicker to call.
+		public static updateDisplays(): void { // A compilation method of most of the methods that update displays on the OS page, to make it simpler and quicker to call.
 			Control.updateDate();
 			Control.updateMemory();
 			Control.updateCPUStatus();
@@ -183,7 +183,8 @@ module TSOS {
 				while(addrstr.length<3){ // To make it look good, I want all addresses to be the same size. I didn't want to do all that in a single line, this is clearer.
 					addrstr = "0" + addrstr;
 				}
-				var th = document.createElement('th');
+				
+				var th = document.createElement('th'); // I switched this to a th to bold the address.
 				th.innerHTML = (Math.floor(i/MEM_SEGMENT_SIZE) + "x" + addrstr);
 				row.appendChild(th);
 				for(var c = 0; c < 8; c++) {
@@ -197,7 +198,8 @@ module TSOS {
 		
 		public static updateCPUStatus(): void { // Updates the CPU Status display table
 			var table = (<HTMLTableElement>document.getElementById("tbCPU"));
-			var row = table.rows[1];
+			var row = table.rows[1]; // The CPU Status table only has a header row and an info row.
+			
 			row.cells[0].innerHTML = _CPU.isExecuting.toString();
 			row.cells[1].innerHTML = _CPU.PC.toString(16).toUpperCase();
 			row.cells[2].innerHTML = _MemoryAccessor.readDirect(_CPU.PC);
@@ -215,7 +217,8 @@ module TSOS {
 					newrow.insertCell(-1);
 				}
 			}
-			for(var i = 0; i < _ProcessCounter; i++){
+			
+			for(var i = 0; i < _ProcessCounter; i++){ // For every item in the Process List, print a row of the table.
 				var row = table.rows[(i+1)];
 				row.cells[0].innerHTML = _ProcessList[i].PID.toString();
 				row.cells[1].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
@@ -248,7 +251,8 @@ module TSOS {
 					newrow.insertCell(-1);
 				}
 			}
-			for(var i = 0; i < qArr.length; i++){
+			
+			for(var i = 0; i < qArr.length; i++){ // For everything in the Ready Display, place a row into the table
 				var row = new_tbody.rows[i];
 				row.cells[0].innerHTML = _ProcessList[parseInt(qArr[i],10)].PID.toString();
 				row.cells[1].innerHTML = _ProcessList[parseInt(qArr[i],10)].PC.toString(16).toUpperCase();
@@ -261,7 +265,7 @@ module TSOS {
 				row.cells[8].innerHTML = _ProcessList[parseInt(qArr[i],10)].completed.toString();
 			}
 			
-			if(_CurrentProcess>=0) {
+			if(_CurrentProcess>=0) { // If there's a currently running process, put that in too.
 				var row = new_tbody.insertRow(0);
 				for(var i = 0; i < 9; i++) {
 					row.insertCell(-1);
@@ -285,13 +289,14 @@ module TSOS {
             var newtab = document.createElement('tbody');
 			for(let x = 0; x < HDD_TRACKS; x++){
 				for(let y = 0; y < HDD_SECTORS; y++){
-					for(let z = 0; z < HDD_BLOCKS; z++){
-						var row = newtab.insertRow(-1);
+					for(let z = 0; z < HDD_BLOCKS; z++){ // For each block,
+						var row = newtab.insertRow(-1); // Create a cell for the location
 						var th = document.createElement('th');
 						th.innerHTML = x + "," + y + "," + z;
 						row.appendChild(th);
-						var data = sessionStorage.getItem(x+""+y+""+z);
-						var cell = row.insertCell(-1)
+						
+						var data = sessionStorage.getItem(x+""+y+""+z); // Create and format a cell for the "In Use" byte
+						var cell = row.insertCell(-1);
 						if(data.substr(0,1).toUpperCase() == "0") {
 							cell.innerHTML = "Not In Use";
 							cell.style.color = "red";
@@ -301,7 +306,8 @@ module TSOS {
 							cell.style.color = "green";
 						}
 						row.appendChild(cell);
-						cell = row.insertCell(-1)
+						
+						cell = row.insertCell(-1); // Create and format a cell for the link location
 						var datalink = data.substr(1,3).toUpperCase();
 						if(datalink == "000") {
 							cell.innerHTML = "No Link";
@@ -312,7 +318,8 @@ module TSOS {
 							cell.innerHTML = datalink;
 						}
 						row.appendChild(cell);
-						var scrolldiv = document.createElement('div');
+						
+						var scrolldiv = document.createElement('div'); // Format the data in a scrollable div
 						scrolldiv.className = "scrollable";
 						scrolldiv.innerHTML = data.substring(4).toUpperCase();
 						row.insertCell(-1).appendChild(scrolldiv);

@@ -37,7 +37,7 @@ module TSOS {
             return retVal;
         }
 		
-		public prioritySort(l, r) {
+		public prioritySort(l, r) { // This sorts the queue by a priority in the _ProcessList. Only meant to be used by the _ReadyList
 			var index;
 			if (this.q.length > 1) {
 				index = this.partition(l, r);

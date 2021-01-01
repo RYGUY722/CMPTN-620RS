@@ -4,7 +4,7 @@ module TSOS {
 
 		constructor(public PID: number = _ProcessCounter,
 					public Segment: number = -1,
-					public Location: String = "N/A",
+					public Location: String = "N/A", // N/A, Memory, Storage, Deleted
 					public State: string = "new", // New, waiting, ready, running, terminated
 					public PC: number = 0,
                     public Acc: number = 0,
