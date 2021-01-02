@@ -106,6 +106,7 @@ var TSOS;
                 freeSeg = _ProcessList[pid1].Segment;
                 _ProcessList[pid1].Segment = -1;
                 _ProcessList[pid1].Location = "Disk";
+                _Kernel.krnTrace("Process " + pid1 + " moved into storage.");
             }
             // ROLL IN PID2
             var newprog = _Kernel.krnFileIO(8, [".SWAP~" + pid2]).toString();
@@ -115,6 +116,7 @@ var TSOS;
             _ProcessList[pid2].Segment = freeSeg;
             _ProcessList[pid2].Location = "Memory";
             _ResidentList[_ProcessList[pid2].Segment] = pid2;
+            _Kernel.krnTrace("Process " + pid2 + " moved into memory.");
         }
     }
     TSOS.Scheduler = Scheduler;

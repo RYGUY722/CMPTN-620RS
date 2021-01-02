@@ -1,7 +1,8 @@
 var TSOS;
 (function (TSOS) {
     class ProcessControlBlock {
-        constructor(PID = _ProcessCounter, Segment = -1, Location = "N/A", State = "new", // New, waiting, ready, running, terminated
+        constructor(PID = _ProcessCounter, Segment = -1, Location = "N/A", // N/A, Memory, Storage, Deleted
+        State = "new", // New, waiting, ready, running, terminated
         PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, priority = 16, // 0 is the highest priority, 31 is the lowest.
         completed = false, rewrite = false) {
             this.PID = PID;

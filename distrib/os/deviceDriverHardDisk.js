@@ -32,36 +32,36 @@ var TSOS;
             sessionStorage.setItem("000", this.generateMessage(1, "100", (((HDD_TRACKS - 1) * HDD_SECTORS * HDD_BLOCKS) + "F"))); // I use the MBR to store the remaining data blocks. This way, I can easily reference it when adding a file to check if it will fit.
         }
         create(filename) {
-            var diskspace = this.getMessage(sessionStorage.getItem("000"));
+            var diskspace = this.getMessage(sessionStorage.getItem("000")); // Get the remaining space on the disk
             diskspace = diskspace.substring(0, diskspace.indexOf("F"));
             var diskspaceint = parseInt(diskspace);
             var filenamehex = this.translateToASCII(filename);
-            if (diskspaceint > 0) { // Check that there is enough space in the file system
-                if (!this.isTooLarge(filenamehex)) {
-                    var fileLoc = this.findFreeLocation(1);
-                    if (fileLoc != "-1") {
-                        var dirLoc = this.findFreeLocation(0);
-                        var hexData = this.generateMessage(1, fileLoc, filenamehex);
-                        sessionStorage.setItem(dirLoc, hexData);
-                        sessionStorage.setItem(fileLoc, this.generateMessage(1, "000", ""));
-                        diskspaceint--;
-                        sessionStorage.setItem("000", this.generateMessage(1, this.getLink(sessionStorage.getItem("000")), (diskspaceint + "F")));
+            if (diskspaceint > 0) { // Check that there is space in the file system
+                if (!this.isTooLarge(filenamehex)) { // Check that there is ENOUGH space in the file system
+                    var fileLoc = this.findFreeLocation(1); // Get a spot for the file
+                    if (fileLoc != "-1") { // Assuming there was a spot
+                        var dirLoc = this.findFreeLocation(0); // Get a spot in the directory
+                        var hexData = this.generateMessage(1, fileLoc, filenamehex); // Generate a message for the directory
+                        sessionStorage.setItem(dirLoc, hexData); // Set the directory message
+                        sessionStorage.setItem(fileLoc, this.generateMessage(1, "000", "")); // Mark the file location as in use
+                        diskspaceint--; // Decrement the disk space tracker by 1
+                        sessionStorage.setItem("000", this.generateMessage(1, this.getLink(sessionStorage.getItem("000")), (diskspaceint + "F"))); // Save that disk space value
                     }
                 }
             }
         }
         rename(filename, newfilename) {
             var filenamehex = this.translateToASCII(newfilename);
-            if (!this.isTooLarge(filenamehex)) {
-                var fileLoc = this.findFile(filename);
-                if (fileLoc != "-1") {
-                    var hexData = this.generateMessage(1, this.getLink(sessionStorage.getItem(fileLoc)), filenamehex);
-                    sessionStorage.setItem(fileLoc, hexData);
+            if (!this.isTooLarge(filenamehex)) { // Check the new filename can fit
+                var fileLoc = this.findFile(filename); // Find our file
+                if (fileLoc != "-1") { // Assuming we found it,
+                    var hexData = this.generateMessage(1, this.getLink(sessionStorage.getItem(fileLoc)), filenamehex); // Generate the message with the new name
+                    sessionStorage.setItem(fileLoc, hexData); // Set it
                 }
             }
         }
         copy(filename) {
-            this.create(filename + "(1)");
+            this.create(filename + "(1)"); // I'm a dirty Windows user, kill me.
             this.write(filename + "(1)", this.read(filename));
         }
         writePlain(filename, contents) {
@@ -95,13 +95,13 @@ var TSOS;
                         var fullData = "";
                         var curLoc;
                         var data = "";
-                        while (this.inUse(sessionStorage.getItem(nextLoc)) && nextLoc != "000") {
+                        while (this.inUse(sessionStorage.getItem(nextLoc)) && nextLoc != "000") { // While the next block is actually in use and there's a next location...
                             fullData = sessionStorage.getItem(nextLoc);
                             curLoc = nextLoc;
                             nextLoc = this.getLink(fullData);
                             data = this.getMessage(fullData);
                             sessionStorage.setItem(curLoc, this.generateMessage(0, nextLoc, data));
-                            diskspaceint++;
+                            diskspaceint++; // This space is now free, so increase the disk space tracker
                         }
                     }
                     sessionStorage.setItem(fileLoc, this.generateMessage(1, "000", contents)); // Set the current location to a newly generated message (This block is in use, nextLoc is the linked location, and chunk is the actual data).
@@ -139,7 +139,7 @@ var TSOS;
                 var fullData = sessionStorage.getItem(nextLoc);
                 var data = "";
                 nextLoc = this.getLink(fullData);
-                while (nextLoc != "000") {
+                while (nextLoc != "000") { // While we have another link, keep reading down the chain.
                     fullData = sessionStorage.getItem(nextLoc);
                     nextLoc = this.getLink(fullData);
                     data = data + this.getMessage(fullData);

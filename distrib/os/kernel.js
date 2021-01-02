@@ -191,7 +191,7 @@ var TSOS;
             }
             else {
                 switch (mode) { // 0 = format, 1 = create, 2 = write, 3 = view, 4 = list, 5 = delete, 6 = create silently, 7 = write direct, 8 = view direct, 9 = delete silently, 10 = find file, 11 = check file can fit on disk, 12 = rename, 13 = copy
-                    case 0:
+                    case 0: // Format
                         if (args[0] == "-full") {
                             _krnHDDDriver.format(1);
                         }
@@ -201,7 +201,7 @@ var TSOS;
                         _StdOut.putText("Disk formatted.");
                         _HDDReady = true;
                         break;
-                    case 1:
+                    case 1: // Create
                         if (args[0].length > (HDD_BLOCK_SIZE - 4)) {
                             _StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE - 4) + " characters or less.");
                             break;
@@ -215,7 +215,7 @@ var TSOS;
                             this.krnFileIO(1, [args[0] + "(1)"]);
                         }
                         break;
-                    case 2:
+                    case 2: // Write
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             _StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
                             break;
@@ -223,17 +223,17 @@ var TSOS;
                         _krnHDDDriver.writePlain(args[0], args[1]);
                         _StdOut.putText("Wrote to file " + args[0] + ".");
                         break;
-                    case 3:
+                    case 3: // View/Read
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             _StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
                             break;
                         }
                         _StdOut.putText(_krnHDDDriver.readPlain(args[0]));
                         break;
-                    case 4:
+                    case 4: // List
                         _krnHDDDriver.list(parseInt(args[0]));
                         break;
-                    case 5:
+                    case 5: // Delete
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             _StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
                             break;
@@ -241,7 +241,7 @@ var TSOS;
                         _krnHDDDriver.deleteFile(args[0]);
                         _StdOut.putText("File " + args[0] + " deleted.");
                         break;
-                    case 6:
+                    case 6: // Create with no console message
                         if (args[0].length > (HDD_BLOCK_SIZE - 4)) {
                             break;
                         }
@@ -252,38 +252,38 @@ var TSOS;
                             this.krnFileIO(1, [args[0] + "(1)"]);
                         }
                         break;
-                    case 7:
+                    case 7: // Write without translating the message to hex
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             break;
                         }
                         _krnHDDDriver.write(args[0], args[1]);
                         break;
-                    case 8:
+                    case 8: // Read/View file without translation (view the hex)
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             break;
                         }
                         return _krnHDDDriver.read(args[0]);
                         break;
-                    case 9:
+                    case 9: // Delete file without console message
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             break;
                         }
                         _krnHDDDriver.deleteFile(args[0]);
                         break;
-                    case 10:
+                    case 10: // Find file
                         if (_krnHDDDriver.findFile(args[0]) == "-1") {
                             return false;
                             break;
                         }
                         return true;
                         break;
-                    case 11:
+                    case 11: // Check if file can fit on the disk
                         if (_krnHDDDriver.canFit(args[0])) {
                             return true;
                         }
                         return false;
                         break;
-                    case 12:
+                    case 12: // Rename
                         if (_krnHDDDriver.findFile(args[0]) != "-1") {
                             if (args[1].length > (HDD_BLOCK_SIZE - 4)) {
                                 _StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE - 4) + " characters or less.");
@@ -297,7 +297,7 @@ var TSOS;
                         }
                         _StdOut.putText("File " + args[0] + " not found.");
                         break;
-                    case 13:
+                    case 13: // Copy
                         if ((args[0].length + 3) > (HDD_BLOCK_SIZE - 4)) {
                             _StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE - 4) + " characters or less.");
                             break;
@@ -316,7 +316,7 @@ var TSOS;
                             }
                         }
                         break;
-                    default:
+                    default: // If the code is not 0-13, throw an error.
                         this.krnTrapError("Invalid File I/O operation. Mode = " + mode);
                 }
             }
