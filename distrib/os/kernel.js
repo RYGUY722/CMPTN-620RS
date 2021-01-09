@@ -133,10 +133,11 @@ var TSOS;
                     }
                     else if (_CPU.Xreg == 2) {
                         var addr = _CPU.Yreg;
-                        while (_MemoryAccessor.read(_ProcessList[_CurrentProcess].Segment, addr) != "00") {
-                            var lettercode = parseInt(_MemoryAccessor.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
+                        var lettercode = parseInt(_MemoryAccessor.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
+                        while (lettercode != 0) {
                             _StdOut.putText(String.fromCharCode(lettercode));
                             addr++;
+                            lettercode = parseInt(_MemoryAccessor.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
                         }
                     }
                     break;

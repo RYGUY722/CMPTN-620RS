@@ -86,16 +86,16 @@ var TSOS;
                         contents = contents.substring((2 * (HDD_BLOCK_SIZE - 4))); // Shred that from the existing string,
                         sessionStorage.setItem(fileLoc, this.generateMessage(1, nextLoc, chunk)); // Set the current location to a newly generated message (This block is in use, nextLoc is the linked location, and chunk is the actual data),
                         fileLoc = nextLoc; // Move our file location to the next location.
+                        sessionStorage.setItem(fileLoc, this.generateMessage(1, "000", "")); // Mark the next location as used. Otherwise, we will continually write over the same second block.
                         contWrite = this.isTooLarge(contents); // Check if the remaining data is still too big for 1 block,
                     }
-                    // If the data will fit in one block (or once it does, if it ever entered the loop above), it writes one last time. nextLoc is not needed here as this is the last block, nor do we need to break up the data into a smaller chunk.
                     var fileCheck = sessionStorage.getItem(fileLoc);
                     if (this.inUse(fileCheck) && this.getLink(fileCheck) != "000") { // When you are rewriting a file, you could be writing a smaller text that takes up fewer blocks. In this scenario, we need to do a modified delete function and set the later blocks as not in use.
                         var nextLoc = this.getLink(fileCheck);
                         var fullData = "";
                         var curLoc;
                         var data = "";
-                        while (this.inUse(sessionStorage.getItem(nextLoc)) && nextLoc != "000") { // While the next block is actually in use and there's a next location...
+                        while (nextLoc != "000" && this.inUse(sessionStorage.getItem(nextLoc))) { // While the next block is actually in use and there's a next location...
                             fullData = sessionStorage.getItem(nextLoc);
                             curLoc = nextLoc;
                             nextLoc = this.getLink(fullData);
@@ -104,7 +104,8 @@ var TSOS;
                             diskspaceint++; // This space is now free, so increase the disk space tracker
                         }
                     }
-                    sessionStorage.setItem(fileLoc, this.generateMessage(1, "000", contents)); // Set the current location to a newly generated message (This block is in use, nextLoc is the linked location, and chunk is the actual data).
+                    // If the data will fit in one block (or once it does, if it entered the loop above), it writes one last time. nextLoc is not needed here as this is the last block, nor do we need to break up the data into a smaller chunk.
+                    sessionStorage.setItem(fileLoc, this.generateMessage(1, "000", contents));
                 }
                 sessionStorage.setItem("000", this.generateMessage(1, this.getLink(sessionStorage.getItem("000")), (diskspaceint + "F"))); // We have to save our new remaining disk space to the MBR. This is inside the if block because it won't change if the target file was never found.
             }

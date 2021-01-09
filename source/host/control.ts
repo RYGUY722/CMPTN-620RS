@@ -130,6 +130,7 @@ module TSOS {
 				(<HTMLButtonElement>document.getElementById("btnStep")).disabled = false;
 				// And display that we are now in Single-Step Mode.
 				(<HTMLButtonElement>document.getElementById("btnModeChange")).value = "Mode: Single-Step";
+				(<HTMLInputElement> document.getElementById("btnStep")).focus();
 			}
 			else{ //Otherwise, we need to switch back to normal mode.
 				Control.hostLog("Switching to Normal Mode", "host");

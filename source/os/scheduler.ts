@@ -102,10 +102,10 @@ module TSOS {
 		}
 		
 		public rollProcess(pid1, pid2) { // Rolls out PID1 onto the storage drive (assuming PID1 is valid or and that there isn't free space in memory), then rolls in PID2.
-			var freeSeg;
+			var openSeg;
 			// CHECK FOR FREE SEGMENT
 			if(_ResidentList.includes(-1)) {
-				freeSeg = _ResidentList.indexOf(-1);
+				openSeg = _ResidentList.indexOf(-1);
 			}
 			
 			// ROLL OUT PID1
@@ -118,22 +118,26 @@ module TSOS {
 					_Kernel.krnFileIO(6, [".SWAP~"+pid1]); // Make it.
 				}
 				_Kernel.krnFileIO(7, [".SWAP~"+pid1, prog]); // Then write the program to it.
-				freeSeg = _ProcessList[pid1].Segment;
+				openSeg = _ProcessList[pid1].Segment;
 				_ProcessList[pid1].Segment = -1;
 				_ProcessList[pid1].Location = "Disk";
-				_Kernel.krnTrace("Process " + pid1 + " moved into storage.");
+				_Kernel.krnTrace("Process " + pid1 + " moved into storage");
 			}
+			
+			
+			_MemoryManager.clearSeg(openSeg);
+			_Kernel.krnTrace("Cleared segment " + openSeg);
 			
 			// ROLL IN PID2
 			var newprog = _Kernel.krnFileIO(8, [".SWAP~"+pid2]).toString();
 			newprog = newprog.substr(0, MEM_SEGMENT_SIZE);
-			_MemoryManager.load(freeSeg, newprog);
+			_MemoryManager.load(newprog, openSeg);
 			
 			// UPDATE THE OTHER INFORMATION
-			_ProcessList[pid2].Segment = freeSeg;
+			_ProcessList[pid2].Segment = openSeg;
 			_ProcessList[pid2].Location = "Memory";
-			_ResidentList[_ProcessList[pid2].Segment] = pid2;
-			_Kernel.krnTrace("Process " + pid2 + " moved into memory.");
+			_ResidentList[openSeg] = pid2;
+			_Kernel.krnTrace("Process " + pid2 + " moved into segment "+openSeg);
 			
 		}
 		

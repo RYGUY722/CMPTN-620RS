@@ -107,6 +107,7 @@ var TSOS;
                 document.getElementById("btnStep").disabled = false;
                 // And display that we are now in Single-Step Mode.
                 document.getElementById("btnModeChange").value = "Mode: Single-Step";
+                document.getElementById("btnStep").focus();
             }
             else { //Otherwise, we need to switch back to normal mode.
                 Control.hostLog("Switching to Normal Mode", "host");
