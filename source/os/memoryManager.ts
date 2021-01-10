@@ -8,7 +8,7 @@ module TSOS {
 		
 		public load(code, segment): void { // Writes a segment's worth of code into the memory
 			var startByte = this.translateAddress(segment, 0);
-			for (let i = 0; i < code.length && i < MEM_SEGMENT_SIZE; i+=2) { // Write the user code into memory, byte by byte (yes, bytes are still 2 characters).
+			for (let i = 0; i < code.length && i < (MEM_SEGMENT_SIZE*2); i+=2) { // Write the user code into memory, byte by byte (yes, bytes are still 2 characters).
 				_MemoryAccessor.writeDirect((startByte + i/2), (code.charAt(i)+code.charAt(i+1)));
 			}
 		}

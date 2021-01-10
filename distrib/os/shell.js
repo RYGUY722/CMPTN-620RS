@@ -406,7 +406,7 @@ var TSOS;
                     if (targetSeg != -1) { // If a segment is free, we'll try to load it into there.
                         _Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
                         _MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
-                        _Kernel.krnTrace("PID " + _ProcessCounter + " loaded into memory at segment " + targetSeg + ".");
+                        _Kernel.krnTrace("PID " + _ProcessCounter + " loaded into memory at segment " + targetSeg);
                         _StdOut.putText("Process loaded into segment " + targetSeg);
                         _StdOut.advanceLine();
                         _ProcessList[_ProcessCounter].Location = "Memory";
@@ -416,7 +416,7 @@ var TSOS;
                             _Kernel.krnFileIO(6, [".SWAP~" + _ProcessCounter]);
                             _Kernel.krnFileIO(7, [".SWAP~" + _ProcessCounter, fin]);
                             _ProcessList[_ProcessCounter].Location = "Disk";
-                            _Kernel.krnTrace("PID " + _ProcessCounter + " loaded into storage.");
+                            _Kernel.krnTrace("PID " + _ProcessCounter + " loaded into storage");
                             _StdOut.putText("Process loaded into storage.");
                             _StdOut.advanceLine();
                         }

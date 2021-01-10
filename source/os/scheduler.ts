@@ -130,7 +130,7 @@ module TSOS {
 			
 			// ROLL IN PID2
 			var newprog = _Kernel.krnFileIO(8, [".SWAP~"+pid2]).toString();
-			newprog = newprog.substr(0, MEM_SEGMENT_SIZE);
+			newprog = newprog.substr(0, (MEM_SEGMENT_SIZE*2));
 			_MemoryManager.load(newprog, openSeg);
 			
 			// UPDATE THE OTHER INFORMATION
