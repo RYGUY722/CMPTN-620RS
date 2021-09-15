@@ -1,5 +1,11 @@
 Ryan Sheffler's OntOS
 =====================
+This is a basic CLI-based operating system intended to be run in a browser simply by opening `index.html`. Credits for the initial codebase are listed below. Originally worked on in an iterative project format over the Fall 2020 semester for a course at Marist College, this project will be updated with additional features as a novelty freetime project to keep myself in practice and as an excuse to expose myself to more information about the inner workings of the computers of years past. 
+
+Lab Information
+===============
+
+As stated, this repository was originally created to house a lab for a college course. Each branch other than master acts as a project submission, but I'll probably just be pushing features directly to master from now on.
 Each project has its own branch. After the project's completion, the changes are merged back to the master branch and a new project branch is started.  
 All lab questions can be found in the "questions" folder.  
   
@@ -10,7 +16,7 @@ All lab questions can be found in the "questions" folder.
 
 **UPDATE, 9/8/2020 1:43 AM:** I just realized I wasn't referencing a specific issue number in my commits.... Oops... I can't edit them now, but they all definitely say what was added and which issue was addressed, just in words, not numbers. Will be including numbers in future commits.
 
-*Keeping the below information for easy future access.*
+*Below is the description of the original repository, kept for ease of reference and posterity.*
 
 2019 Browser-based Operating System in TypeScript
 =================================================
