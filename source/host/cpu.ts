@@ -167,7 +167,7 @@ module TSOS {
 					_MemoryAccessor.write(_ProcessList[_CurrentProcess].Segment, (parseInt(addr, 16)), hexval); //Write the translated string back into memory.
 					break;
 				}
-				case ("FF"): {
+				case ("FF"): { // SYS: Calls an interrupt for the next cycle based on the value in the X register.
 					_KernelInterruptQueue.enqueue(new Interrupt(PROGRAM_IRQ, null));
 					break;
 				}

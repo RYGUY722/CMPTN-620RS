@@ -47,6 +47,7 @@ var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager:any=null;
 
 var _Scheduler:any=null;
+var _ProgramLanguage: string = "mc"; // Available languages: "mc" = Machine Code (normal), "asm" = Assembly
 
 var _OSclock: number = 0;  // Page 23.
 

@@ -117,9 +117,14 @@ var TSOS;
             // getschedule
             sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "- Returns the current scheduler algorithm.");
             this.commandList[this.commandList.length] = sc;
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // language
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "language", "- Returns the current and available languages or sets it.");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
+            this.shellVer([]);
+            _StdOut.advanceLine();
+            _StdOut.putText("READY");
+            _StdOut.advanceLine();
             this.putPrompt();
         }
         putPrompt() {
@@ -731,6 +736,11 @@ var TSOS;
                     break;
                 default:
                     _StdOut.putText("Scheduler mode unknown or improperly set.");
+            }
+        }
+        // Returns the current scheduler mode.
+        shellLanguage(args) {
+            if (args.length < 2) {
             }
         }
     }

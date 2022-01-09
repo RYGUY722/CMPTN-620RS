@@ -76,6 +76,8 @@ module TSOS {
         public static hostBtnStartOS_click(btn): void {
 			// Do a fancy animation, because we're cool...
 			document.body.style.background = "#000011 url(distrib/images/core_background.png) no-repeat fixed center";
+			document.getElementById("display").style.backgroundColor = "rgba(202,232,117,.5)";
+			document.getElementById("display").style.border = "2px solid red";
 			
             // Disable the (passed-in) start button...
             btn.disabled = true;

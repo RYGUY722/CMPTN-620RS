@@ -36,8 +36,10 @@ h3 {
 }
 
 #display {
-  background-color: rgba(223,219,195,.5);
-  border: 2px solid red;
+  background-color: rgba(202,232,117,0);
+  border: 0px solid red;
+  border-radius: 4px;
+  transition: background 2s, border 2s;
   cursor: default;
 }
 
@@ -52,10 +54,17 @@ h3 {
   text-align: center;
 }
 
+textarea {
+	background-color: rgb(59, 59, 59);
+	color: white;
+    border-radius: 4px;
+}
+
 table {
   display: block;
   border: 2px solid red;
-  background-color: rgba(223,219,195,.5);
+  border-radius: 4px;
+  background-color: rgba(56,55,35,.5);
   width: 405px;
   text-align: center;
   border-collapse: collapse;
@@ -64,6 +73,7 @@ table {
 
 table td, table th {
   border: 1px solid black;
+  color: white;
 }
 
 div.scrollable {
