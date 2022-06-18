@@ -17,6 +17,10 @@ const DEFAULT_QUANTUM = 6; // The default time each process gets to run.
 const MEM_SEGMENT_SIZE = 256; // The size of a memory segment code is allowed to occupy.
 const MEM_SEGMENTS = 3; // Please place the number of desired memory segments as the number within this constant.
 const MEM_MAXIMUM_SIZE = MEM_SEGMENT_SIZE * MEM_SEGMENTS; // The full memory size
+const HDD_TRACKS = 3; // These define the size of the Disk.
+const HDD_SECTORS = 7;
+const HDD_BLOCKS = 7;
+const HDD_BLOCK_SIZE = 64;
 const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ = 1;
@@ -33,8 +37,10 @@ var _MemoryAccessor;
 // Software
 var _MemoryManager = null;
 var _Scheduler = null;
+var _ProgramLanguage = "mc"; // 
 var _OSclock = 0; // Page 23.
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
+var _HDDReady = false;
 var _Canvas; // Initialized in Control.hostInit().
 var _DrawingContext; // = _Canvas.getContext("2d");  // Assigned here for type safety, but re-initialized in Control.hostInit() for OCD and logic.
 var _DefaultFontFamily = "sans"; // Ignored, I think. The was just a place-holder in 2008, but the HTML canvas may have use for it.
@@ -52,6 +58,7 @@ var _CurrentProcess = -1;
 var _ProcessList = new Array();
 var _ResidentList = new Array(MEM_SEGMENTS);
 var _ReadyList = null;
+var _LoadedList = new Array();
 // Standard input and output
 var _StdIn = null;
 var _StdOut = null;
@@ -62,6 +69,7 @@ var _OsShell;
 var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver = null;
+var _krnHDDDriver = null;
 var _hardwareClockID = null;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .

@@ -156,11 +156,78 @@ module TSOS {
 								  "kosmos",
 								  "- Generates a random number to see if you get Kos-mos in Xenoblade 2.");
 			this.commandList[this.commandList.length] = sc;
+			
+			// format <mode>
+			sc = new ShellCommand(this.shellFormat,
+								  "format",
+								  "<mode> - Formats HTML session storage to create and clear the disk.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// create <string>
+			sc = new ShellCommand(this.shellCreate,
+								  "create",
+								  "<string> - Creates a file with the given filename.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// rename <string> <string>
+			sc = new ShellCommand(this.shellRename,
+								  "rename",
+								  "<string> <string> - Renames the file with the given filename to the new filename.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// copy <string>
+			sc = new ShellCommand(this.shellCopy,
+								  "copy",
+								  "<string> - Copies the file with the given filename.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// write <string> <string>
+			sc = new ShellCommand(this.shellWrite,
+								  "write",
+								  "<string> - writes the text to the file with the given filename.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// read <string>
+			sc = new ShellCommand(this.shellRead,
+								  "read",
+								  "<string> - Prints the contents of the file with the given filename.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// ls <string>
+			sc = new ShellCommand(this.shellList,
+								  "ls",
+								  "<mode> - Returns all filenames. Use -l to view hidden files.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// delete <string>
+			sc = new ShellCommand(this.shellDelete,
+								  "delete",
+								  "<string> - Deletes the file with the given filename.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// setschedule <rr|fcfs|priority>
+			sc = new ShellCommand(this.shellSetSchedule,
+								  "setschedule",
+								  "<rr|fcfs|priority> - Sets the scheduler algorithm.");
+			this.commandList[this.commandList.length] = sc;
+			
+			// getschedule
+			sc = new ShellCommand(this.shellGetSchedule,
+								  "getschedule",
+								  "- Returns the current scheduler algorithm.");
+			this.commandList[this.commandList.length] = sc;
 
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // language
+			sc = new ShellCommand(this.shellGetSchedule,
+								  "language",
+								  "- Returns the current and available languages or sets it.");
+			this.commandList[this.commandList.length] = sc;
 
             // Display the initial prompt.
+			this.shellVer([]);
+            _StdOut.advanceLine();
+            _StdOut.putText("READY");
+			_StdOut.advanceLine();
             this.putPrompt();
         }
 
@@ -379,8 +446,9 @@ module TSOS {
                 _StdOut.putText("Usage: rot13 <string>  Please supply a string.");
             }
         }
-
-        public shellPrompt(args: string[]) { //Allows the user to change the prompt from just ">"
+		
+		// Allows the user to change the prompt from just ">".
+        public shellPrompt(args: string[]) { 
             if (args.length > 0) {
                 _OsShell.promptStr = args[0];
             } else {
@@ -388,117 +456,124 @@ module TSOS {
             }
         }
 		
-		public shellDate(args: string[]) { //Gives the user the current date
+		// Gives the user the current date.
+		public shellDate(args: string[]) { 
 			var d = new Date();
 			_StdOut.putText("The current date is "+d+".");
 		}
 		
-		public shellWhereami(args: string[]) { //Prints a predefined message
+		// Prints a predefined message.
+		public shellWhereami(args: string[]) { 
 			_StdOut.putText("The current location identifies as...");
 			_StdOut.advanceLine();
 			_StdOut.putText("First Low Orbit Station: Rhadamanthus.");
 		}
 		
-		public shellStatus(args: string[]) { // Allows the user to input a status to display at the top of the screen
+		// Allows the user to input a status to display at the top of the screen.
+		public shellStatus(args: string[]) { 
 			if (args.length > 0) {
 				var stat = args[0];
 				for(var i = 1; i < args.length; i++) { // Args is an array split on spaces. For the status, we need to undo that.
 					stat = stat + " " + args[i];
 				}
-				document.getElementById("statusIn").innerHTML = stat;
+				document.getElementById("statusIn").innerHTML = stat; // Who cares about keeping it in a variable somewhere, just change the HTML of the page directly.
 			}
-			else {
+			
+			else { // If the user didn't give us a status message, tell them how stupid they are.
                 _StdOut.putText("Usage: status <string>  Please supply a string.");
 			}
 		}
 		
 		// Loads the code from the User Program Input field.
-		shellLoad(args: string[]) { 
-			// First, check if there's an uncompleted program in memory. Right now, only one program can be in memory, so check the last one.
-			// if(_ProcessCounter > 0 && !(_ProcessList[_ProcessCounter-1].completed) && !(_ProcessList[_ProcessCounter-1].rewrite)){
-				// _StdOut.putText("Warning: Previous program is not complete. Load again to overwrite program.");
-				// _ProcessList[_ProcessCounter-1].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
-			// }
-			if(_Scheduler.isFull() && (!(_ProcessList[_ResidentList[0]].completed) && !(_ProcessList[_ResidentList[0]].rewrite))){
-				_StdOut.putText("Warning: Memory is currently full. Load again to overwrite the program in segment 0.");
-				_ProcessList[_ResidentList[0]].rewrite = true; // Each PCB has a rewrite flag. If set to true, it can be overwritten without being completed, meaning the user can load a new program without running the last.
+		public shellLoad(args: string[]) { 
+			// Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
+			var a = (<HTMLInputElement> document.getElementById("taProgramInput")).value; 
+			a = a.replace(/\s/g,''); // The integer cannot store spaces, so we remove them from the original string here.
+			var fin = a; //If the code is valid, we will need to copy a at it's current point into memory, so we might as well store it in another variable instead of undoing later changes.
+			
+			// There are 2 checks to perform before checking if "a" is a valid hexadecimal string
+			
+			if(a.length==0) { // If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
+				_StdOut.putText("Please enter an instruction set.");
 			}
-			else{
+			
+			else if(a.length%2!=0) { // Hexadecimal opcodes come in pairs (00-FF), so the string length must be even.
+				_StdOut.putText("The instruction set is invalid.");
+			}
+			
+			else if(a.length > (MEM_SEGMENT_SIZE*2)){ // We should also check that it can actually fit into memory first, too (each byte is 2 characters).
+				_StdOut.putText("The instruction set is too large.");
+			}
+			
+			else { // If the string passes the prerequisites, check if it is valid hexadecimal.
+				var valid = true; // This boolean will push us out if the hex is ever invalid.
 				
-				if(_ResidentList[0] >= 0){ // Even if it wasn't used, though, each PCB should be properly disposed of when wiped. Otherwise, an invalid process could be run.
-					if(_ProcessList[_ResidentList[0]].rewrite) {
-						_Scheduler.endProcess(_ResidentList[0]);
+				// Unfortunately, the method I found relies on converting the hexadecimal to a 4-byte integer, which means I have to chunk it up like this to verify.
+				while(valid && a.length>8) { // I'm sure there's a way to do this cleaner, like through a for loop or something, but I'm just not sure how to do that.
+					var asub = a.substring(0, 8); // Grab a 4 byte chunk of a
+					a = a.substring(8, a.length); // Remove that chunk from a
+					var b = parseInt(asub,16); // Translate that chunk to a base 10 int
+					while((asub.charAt(0)=='0') && !(asub.length==1)) { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly. If it's all zeroes, though, 1 should remain.
+						asub=asub.substring(1,asub.length);
+					}
+					if(!(asub.toLowerCase() == b.toString(16))){ // Translate the int back, and compare.
+						valid = false;
 					}
 				}
 				
-				// Code checker - This works by a method I found online of converting the given code into a base 10 integer, then comparing it against the original hexadecimal string
-				var a = (<HTMLInputElement> document.getElementById("taProgramInput")).value; 
-				a = a.replace(/\s/g,''); // The integer cannot store spaces, so we remove them from the original string here.
-				var fin = a; //If the code is valid, we will need to copy a at it's current point into memory, so we might as well store it in another variable instead of undoing later changes.
+				// After the above loop, we have 4 bytes or less left, so we can just let it rip from here
+				var b = parseInt(a,16); // Translate what's left to a base 10 int
 				
-				// There are 2 checks to perform before checking if "a" is a valid hexadecimal string
-				
-				if(a.length==0) { // If there isn't a program (aka, the string is empty after removing spaces), just cut to the chase.
-					_StdOut.putText("Please enter an instruction set.");
+				while((a.charAt(0)=='0') && !(a.length==1)) { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly. If it's all zeroes, though, 1 should remain.
+					a=a.substring(1,a.length);
 				}
 				
-				else if(a.length%2!=0) { // Hexadecimal opcodes come in pairs (00-FF), so the string length must be even.
-					_StdOut.putText("The instruction set is invalid.");
-				}
-				
-				else if(a.length > (MEM_SEGMENT_SIZE*2)){ // We should also check that it can actually fit into memory first, too (each byte is 2 characters).
-					_StdOut.putText("The instruction set is too large.");
-				}
-				
-				else { // If the string passes the prerequisites, check if it is valid hexadecimal.
-					var valid = true; // This boolean will push us out if the hex is ever invalid.
+				if(valid && (a.toLowerCase()==b.toString(16))) {
+					_StdOut.putText("The instruction set is valid."); // Give the user feedback that their code is accepted.
+					_StdOut.advanceLine();
 					
-					// Unfortunately, the method I found relies on converting the hexadecimal to a 4-byte integer, which means I have to chunk it up like this to verify.
-					while(valid && a.length>8) { // I'm sure there's a way to do this cleaner, like through a for loop or something, but I'm just not sure how to do that.
-						var asub = a.substring(0, 8); // Grab a 4 byte chunk of a
-						a = a.substring(8, a.length); // Remove that chunk from a
-						var b = parseInt(asub,16); // Translate that chunk to a base 10 int
-						while((asub.charAt(0)=='0') && !(asub.length==1)) { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly. If it's all zeroes, though, 1 should remain.
-							asub=asub.substring(1,asub.length);
-						}
-						if(!(asub.toLowerCase() == b.toString(16))){ // Translate the int back, and compare.
-							valid = false;
-						}
-					}
-					
-					// After the above loop, we have 4 bytes or less left, so we can just let it rip from here
-					var b = parseInt(a,16); // Translate what's left to a base 10 int
-					
-					while((a.charAt(0)=='0') && !(a.length==1)) { // If there are zeroes at the beginning, they will not be there when the integer is converted back. We need both strings to match exactly. If it's all zeroes, though, 1 should remain.
-						a=a.substring(1,a.length);
-					}
-					
-					if(valid && (a.toLowerCase()==b.toString(16))) {
-						_StdOut.putText("The instruction set is valid."); // Give the user feedback that their code is accepted.
-						_StdOut.advanceLine();
-						
-						var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
-						if(targetSeg == -1) { targetSeg = 0; } // If we got this far and there are no free segments, we're clearing and overwriting segment 0.
-						
+					_ProcessList.push(new ProcessControlBlock());
+					_StdOut.putText("New Process ID: "+_ProcessCounter);
+					_StdOut.advanceLine();
+					var targetSeg = _Scheduler.getNextFreeSeg(); // Find out what segment we're loading code into.
+					if(targetSeg != -1) { // If a segment is free, we'll try to load it into there.
 						_Scheduler.freeSeg(targetSeg); // Memory should be cleared before writing new programs.
 						_MemoryManager.load(fin, targetSeg); // Load the user's code into the memory
-						_ProcessList.push(new ProcessControlBlock());
+						_Kernel.krnTrace("PID "+_ProcessCounter+" loaded into memory at segment "+targetSeg);
 						_StdOut.putText("Process loaded into segment "+targetSeg);
 						_StdOut.advanceLine();
-						_StdOut.putText("New Process ID: "+_ProcessCounter);
-						_ProcessList[_ProcessCounter].Segment = targetSeg
-						_Scheduler.addProcess(_ProcessCounter);
-						_ProcessCounter++;
+						_ProcessList[_ProcessCounter].Location = "Memory";
 					}
-					else {
-						_StdOut.putText("The instruction set is invalid.");
+					else { // If it was -1, there are no free segments and we have to load into storage.
+						if(_Kernel.krnFileIO(11, [fin])) { // Making sure the disk has enough space
+							_Kernel.krnFileIO(6, [".SWAP~"+_ProcessCounter]);
+							_Kernel.krnFileIO(7, [".SWAP~"+_ProcessCounter, fin]);
+							_ProcessList[_ProcessCounter].Location = "Disk";
+							_Kernel.krnTrace("PID "+_ProcessCounter+" loaded into storage");
+							_StdOut.putText("Process loaded into storage.");
+							_StdOut.advanceLine();
+						}
+						else {
+							_StdOut.putText("No memory available. Loading failed.");
+						}
 					}
+					
+					if(args.length>0) { // All of this code is done anyways.
+						_ProcessList[_ProcessCounter].priority = parseInt(args[0]);
+					}
+					_ProcessList[_ProcessCounter].Segment = targetSeg;
+					_Scheduler.addProcess(_ProcessCounter);
+					_ProcessCounter++;
+					
+				}
+				else {
+					_StdOut.putText("The instruction set is invalid.");
 				}
 			}
 		}
 		
 		// Finally, what computers were made for: Running ~~Doom~~ programs!
-		shellRun(args: string[]) { //Runs a program with the given PID
+		public shellRun(args: string[]) { //Runs a program with the given PID.
 			var pid = parseInt(args[0], 10);
 			if(pid<_ProcessCounter && pid >= 0){
 				if(_ProcessList[pid].completed){
@@ -509,6 +584,10 @@ module TSOS {
 					_StdOut.advanceLine();
 					
 					_Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
+					if(_Scheduler.mode == "priority") { // If we're on priority mode, sort all the processes based on their priority.
+						_ReadyList.prioritySort(0, _ReadyList.getSize()-1);
+						_Kernel.krnTrace("Sorted readied processes by priority.");
+					}
 					_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null)); // Prep the dispatcher
 					_CPU.isExecuting = true; // The CPU is now beginning execution.
 				}
@@ -519,9 +598,9 @@ module TSOS {
 		}
 		
 		// Runs all programs in memory.
-		shellRunAll(args: string[]) { 
-			for(var i=0; i<=MEM_SEGMENTS; i++){
-				var pid = _ResidentList[i];
+		public shellRunAll(args: string[]) { 
+			for(var i=0; i<_LoadedList.length; i++){
+				var pid = _LoadedList[i];
 				if(pid>=0) {
 					_Scheduler.readyProcess(pid); // Log the process as ready to run in the scheduler
 					_StdOut.putText("Readied Process " + pid); // Inform the user that the process is ready
@@ -535,18 +614,23 @@ module TSOS {
 			else {
 				_StdOut.putText("Beginning program execution"); // Inform the user that execution is beginning
 				_StdOut.advanceLine();
+					if(_Scheduler.mode == "priority") { // If we're on priority mode, sort all the processes based on their priority.
+						_ReadyList.prioritySort(0, _ReadyList.getSize()-1);
+						_Kernel.krnTrace("Sorted readied processes by priority.");
+					}
 				_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null)); // Prep the dispatcher
 				_CPU.isExecuting = true; // The CPU is now beginning execution.
 			}
 		}
 		
 		// Clears all the memory at once.
-		shellClearMem(args: string[]) {
-			if(_CPU.isExecuting) {
+		public shellClearMem(args: string[]) {
+			if(_CPU.isExecuting) { // If the CPU is currently running, block the attempt to clear the memory.
 				_StdOut.putText("Programs are currently running, please wait for completion.");
 				_StdOut.advanceLine();
 			}
-			else {
+			
+			else { // Otherwise, end each process in the resident list.
 				for(var i=0; i<=MEM_SEGMENTS; i++){
 					if(_ResidentList[i]>=0){
 						_Scheduler.endProcess(_ResidentList[i]);
@@ -559,19 +643,18 @@ module TSOS {
 			}
 		}
 		
-		shellPs(args: string) {
+		// Lists all currently loaded proceses.
+		public shellPs(args: string) {
 			_StdOut.putText("Current processes:"); // Print a header to the table
 			_StdOut.advanceLine();
-			for(var i=0; i<=MEM_SEGMENTS; i++){
-					if(_ResidentList[i]>=0){
-						_StdOut.putText("Process " + _ResidentList[i] + " - Status: " + _ProcessList[_ResidentList[i]].State.toString()); // Print the PID of each resident process and its state
-						_StdOut.advanceLine();
-					}
+			for(var i=0; i<=_LoadedList.length; i++){
+					_StdOut.putText("Process " + _LoadedList[i] + " - Status: " + _ProcessList[_LoadedList[i]].State.toString()); // Print the PID of each resident process and its state
+					_StdOut.advanceLine();
 				}
 		}
 		
-		// Kill a specific running process
-		shellKill(args: string) {
+		// Kill a specific running process.
+		public shellKill(args: string) {
 			var pid = parseInt(args[0], 10);
 			if(pid<_ProcessCounter && pid >= 0){
 				if(_ProcessList[pid].State == "running" || _ProcessList[pid].State == "ready"){
@@ -589,8 +672,8 @@ module TSOS {
 			}
 		}
 		
-		// Kill all currently running processes
-		shellKillAll(args: string) {
+		// Kill all currently running processes.
+		public shellKillAll(args: string) {
 			var pid;
 			while(!_ReadyList.isEmpty()) { // For every object in the Ready List
 				pid = _ReadyList.dequeue(); // Remove it
@@ -602,8 +685,8 @@ module TSOS {
 			_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null)); // After we're done, tell the scheduler to check its notes, where it will realize it has nothing left to execute and put the CPU to sleep.
 		}
 		
-		// Adjusts the number of cycles each process gets to hog the processor for
-		shellQuantum(args: string) {
+		// Adjusts the number of cycles each process gets to hog the processor for in round robin mode.
+		public shellQuantum(args: string) {
 			var quant = parseInt(args[0], 10);
 			if(quant>=1) {
 				_Scheduler.quantum = quant;
@@ -615,7 +698,7 @@ module TSOS {
 		}
 		
 		// Kill them all. Every last one of them.
-		shellBrick(args: string[]) { //Forces a crash
+		public shellBrick(args: string[]) { // Forces a crash.
 			var msg = "Manual";
 			if(args.length>0){
 				msg += ", " + args[0];
@@ -623,7 +706,8 @@ module TSOS {
 			_Kernel.krnTrapError(msg);
 		}
 		
-		shellRoll(args: string[]) { //Rolls a die of size args[0]
+		// Rolls a die of size args[0].
+		public shellRoll(args: string[]) { 
 			if(args.length==0) { //If there's no arguments, we can't roll the die.
 				_StdOut.putText("Usage: roll <integer>  Please supply an integer.");
 			}
@@ -640,7 +724,8 @@ module TSOS {
 			}
 		}
 		
-		shellKos(args: string[]){ //there is a .01% chance to get the character kos-mos every time you summon a character in xenoblade 2. please god just give me some luck
+		//there is a .01% chance to get the character kos-mos every time you summon a character in xenoblade 2. please god just give me some luck.
+		public shellKos(args: string[]){ 
 			if(Math.random()<=.0001){
 				if(_SarcasticMode){ _StdOut.putText("HOLY FUCKING SHIT, GO BUY A LOTTERY TICKET"); }
 				else { _StdOut.putText("You did it, you got KOS-MOS!"); }
@@ -651,6 +736,165 @@ module TSOS {
 					_StdOut.advanceLine();
 					_StdOut.putText("...Loser.");
 				}
+			}
+		}
+		
+		// Formats the drive. The user has the option of "-quick" or "-full." Defaults to quick. The first format is forced to be a full format. Unusable while the CPU is executing something.
+		public shellFormat(args: string[]) {
+			if(!_CPU.isExecuting) {
+				_StdOut.putText("Formatting the disk...");
+				_StdOut.advanceLine();
+				_Kernel.krnFileIO(0, args);
+			}
+			else {
+				_StdOut.putText("Currently executing programs. Please wait for completion before formatting.");
+			}
+		}
+		
+		// Creates a file with a filename the user specifies. No spaces are allowed in filenames.
+		public shellCreate(args: string[]) {
+			if(args.length<1) { // We need a filename.
+				_StdOut.putText("Usage: create <string>  Please give a filename.");
+			}
+			else {
+				if(args[0].includes("~") || args[0].includes("\\") || args[0].includes("/") || args[0].includes("?") || args[0].includes("|") || args[0].includes(":") || args[0].includes("*") || args[0].includes("<") || args[0].includes(">")) { // These are the restricted characters
+					if(_SarcasticMode) {
+						_StdOut.putText("You dumb fucking cretin, you fucking fool, absolute fucking buffoon, you bumbling idiot. Fuck you.");
+						_StdOut.advanceLine();
+					}
+					_StdOut.putText("Filename contains illegal characters. Do not include: ~\\/?|:*<>");
+				}
+				else{ // If nothing is weird, create the file
+					_Kernel.krnFileIO(1, args);
+				}
+			}
+		}
+		
+		// Renames the file named the first string to the second string.
+		public shellRename(args: string[]) {
+			if(args.length<2) { // We need a filename.
+				_StdOut.putText("Usage: rename <string> <string>  Please give a filename and replacement filename.");
+			}
+			else {
+				if(args[1].includes("~") || args[1].includes("\\") || args[1].includes("/") || args[1].includes("?") || args[1].includes("|") || args[1].includes(":") || args[1].includes("*") || args[1].includes("<") || args[1].includes(">")) { // These are the restricted characters
+					if(_SarcasticMode) {
+						_StdOut.putText("You dumb fucking cretin, you fucking fool, absolute fucking buffoon, you bumbling idiot. Fuck you.");
+						_StdOut.advanceLine();
+					}
+					_StdOut.putText("Filename contains illegal characters. Do not include: ~\\/?|:*<>");
+				}
+				else{ // If nothing seems wrong, make the file.
+					_Kernel.krnFileIO(12, args);
+				}
+			}
+		}
+		
+		// Makes an exact copy of the file with the given filename.
+		public shellCopy(args: string[]) {
+			if(args.length<1) { // We need a filename.
+				_StdOut.putText("Usage: copy <string>  Please give a filename.");
+			}
+			else { // If we've got one, go for the copy.
+				_Kernel.krnFileIO(13, args);
+			}
+		}
+		
+		// Writes whatever the user specifies as the 2nd+ argument as content to the file with the specified filename.
+		public shellWrite(args: string[]) {
+			if(args.length<2) { // We need a filename and contents.
+				_StdOut.putText("Usage: write <string> <string> Please give both a filename and file contents.");
+			}
+			else {
+				var pass = [args.shift(), args.shift()]; // We need to give the kernel an array of size 2, so we combine everything past args[1] into pass[1].
+				while(args.length>0) {
+					pass[1] = pass[1] + " " + args.shift();
+				}
+				_Kernel.krnFileIO(2, pass); // Then pass it into the kernel.
+			}
+		}
+		
+		// Returns the contents of the file with the filename the user specifies.
+		public shellRead(args: string[]) {
+			if(args.length<1) { // We need a filename.
+				_StdOut.putText("Usage: read <string>  Please give a filename.");
+			}
+			else { // If we've got one, try to print the file.
+				_Kernel.krnFileIO(3, args);
+			}
+		}
+		
+		// Lists all the files in the file directory. If "-l" is used, it will show all hidden (beginning with a ".") files, as well.
+		public shellList(args: string[]) {
+			if(args.length<1) { // We could or couldn't have an argument. If there's none, then default to a normal file list.
+				_Kernel.krnFileIO(4, ["0"]);
+			}
+			else {
+				if(args[0] == "-l") { // If there is an argument and it is "-l", then list in full
+					_Kernel.krnFileIO(4, ["1"]);
+				}
+				else{ // Otherwise, default to the normal list.
+					_Kernel.krnFileIO(4, ["0"]);
+				}
+			}
+		}
+		
+		// Deletes the file with the specified filename.
+		public shellDelete(args: string[]) {
+			if(args.length<1) { // We need a filename.
+				_StdOut.putText("Usage: delete <string>  Please give a filename.");
+			}
+			else {
+				if(args[0].includes("~") || args[0].includes("\\") || args[0].includes("/") || args[0].includes("?") || args[0].includes("|") || args[0].includes(":") || args[0].includes("*") || args[0].includes("<") || args[0].includes(">")) { // These are the restricted characters.
+					if(_SarcasticMode) {
+						_StdOut.putText("You really thought I'd let you delete system files? In my realm??? Nerd.");
+						_StdOut.advanceLine();
+					}
+					_StdOut.putText("Filename contains illegal characters. Do not include: ~\\/?|:*<>");
+				}
+				else {
+					_Kernel.krnFileIO(5, args);
+				}
+			}
+		}
+		
+		// Sets the scheduler mode to whatever the user specifies of 3 modes: "rr" for Round Robin, "fcfs" for First Come First Serve, "priority" for Priority (non-preemptive).
+		public shellSetSchedule(args: string[]) {
+			if(args.length<1) { // There is no input
+				_StdOut.putText("Usage: setschedule <rr|fcfs|priority>  Please choose a method.");
+			}
+			else if(args[0]=="rr" || args[0]=="fcfs" || args[0]=="priority") { // If the input is valid
+				_Scheduler.mode = args[0];
+				_StdOut.putText("Mode changed");
+			}
+			else { // There is input, but it is not one of the choices
+				_StdOut.putText("Usage: setschedule <rr|fcfs|priority>  Please choose a valid method.");
+			}
+		}
+		
+		// Returns the current scheduler mode.
+		public shellGetSchedule(args: string[]) {
+			switch(_Scheduler.mode) {
+				case "rr":
+					_StdOut.putText("Scheduler mode: Round Robin.");
+					break;
+					
+				case "fcfs":
+					_StdOut.putText("Scheduler mode: First Come First Serve.");
+					break;
+					
+				case "priority":
+					_StdOut.putText("Scheduler mode: Priority.");
+					break;
+					
+				default: 
+					_StdOut.putText("Scheduler mode unknown or improperly set.");
+			}
+		}
+		
+		// Returns the current scheduler mode.
+		public shellLanguage(args: string[]) {
+			if(args.length<2) {
+				
 			}
 		}
 

@@ -1,11 +1,16 @@
 /* TSOS.css */
 
 body {
-  background: #909193 url(distrib/images/linen.png) repeat;
+  background: #000000 no-repeat fixed center;
+  transition: background 2s;
   font-family: Helvetica, Verdana, Arial, sans-serif;
   font-size: 12pt;
   font-weight: normal;
   font-style: normal;
+}
+
+label {
+	color: white;
 }
 
 h1 {
@@ -31,8 +36,10 @@ h3 {
 }
 
 #display {
-  background-color:#DFDBC3;
-  border: 2px solid red;
+  background-color: rgba(202,232,117,0);
+  border: 0px solid red;
+  border-radius: 4px;
+  transition: background 2s, border 2s;
   cursor: default;
 }
 
@@ -47,20 +54,43 @@ h3 {
   text-align: center;
 }
 
+textarea {
+	background-color: rgb(59, 59, 59);
+	color: white;
+    border-radius: 4px;
+}
+
 table {
   display: block;
   border: 2px solid red;
-  background-color: #DFDBC3;
-  width: 365px;
+  border-radius: 4px;
+  background-color: rgba(56,55,35,.5);
+  width: 405px;
   text-align: center;
   border-collapse: collapse;
+  color: black;
 }
 
 table td, table th {
   border: 1px solid black;
+  color: white;
 }
 
+div.scrollable {
+    width: 600px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    overflow-x: scroll;
+}
+
+
 #tbMemory {
+  overflow-y:scroll;
+  height:200px;
+}
+
+#tbStorage {
   overflow-y:scroll;
   height:200px;
 }

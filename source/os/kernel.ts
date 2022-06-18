@@ -43,6 +43,12 @@ module TSOS {
             _krnKeyboardDriver.driverEntry();                    // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
 
+            // Load the Hard Disk Device Driver
+            this.krnTrace("Loading the HDD device driver.");
+            _krnHDDDriver = new DeviceDriverHardDisk();     // Construct it.
+            _krnHDDDriver.driverEntry();                    // Call the driverEntry() initialization routine.
+            this.krnTrace(_krnHDDDriver.status);
+
             //
             // ... more?
             //
@@ -68,6 +74,8 @@ module TSOS {
             // ... Disable the Interrupts.
             this.krnTrace("Disabling the interrupts.");
             this.krnDisableInterrupts();
+            // Stop the interval that's simulating our clock pulse.
+            clearInterval(_hardwareClockID);
             //
             // Unload the Device Drivers?
             // More?
@@ -100,7 +108,7 @@ module TSOS {
             } else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
 				_CPU.cycle();
 				_Scheduler.currentCycle++;
-				if(_Scheduler.currentCycle>=_Scheduler.quantum){ // Check if enough time has passed for the process to be switched
+				if((_Scheduler.currentCycle>=_Scheduler.quantum) && (_Scheduler.mode=="rr")){ // Check if enough time has passed for the process to be switched and that our scheduler mode is preemptive (ie, round robin).
 					_KernelInterruptQueue.enqueue(new Interrupt(SCHEDULER_IRQ, null));
 				}
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
@@ -147,10 +155,11 @@ module TSOS {
 					}
 					else if(_CPU.Xreg == 2){
 						var addr = _CPU.Yreg;
-						while(_MemoryManager.read(_ProcessList[_CurrentProcess].Segment, addr) != "00") {
-							var lettercode = parseInt(_MemoryManager.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
+						var lettercode = parseInt(_MemoryAccessor.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
+						while(lettercode != 0) {
 							_StdOut.putText(String.fromCharCode(lettercode));
 							addr++;
+							lettercode = parseInt(_MemoryAccessor.read(_ProcessList[_CurrentProcess].Segment, addr), 16);
 						}
 					}
 					break;
@@ -202,6 +211,157 @@ module TSOS {
                 }
              }
         }
+		
+		public krnFileIO(mode, args: string[]) { // This edits the file system in some way. The mode is a number, and the operations are mostly in the same order as in the shell.
+			if(!_HDDReady && mode!=0) {
+				_StdOut.putText("Disk not formatted. Please format disk first.");
+			}
+			else {
+				switch (mode) { // 0 = format, 1 = create, 2 = write, 3 = view, 4 = list, 5 = delete, 6 = create silently, 7 = write direct, 8 = view direct, 9 = delete silently, 10 = find file, 11 = check file can fit on disk, 12 = rename, 13 = copy
+					case 0: // Format
+						if(args[0] == "-full") {
+							_krnHDDDriver.format(1);
+						}
+						else {
+							_krnHDDDriver.format(0);
+						}
+						_StdOut.putText("Disk formatted.");
+						_HDDReady = true;
+						break;
+						
+					case 1: // Create
+						if(args[0].length>(HDD_BLOCK_SIZE-4)) {
+							_StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE-4) + " characters or less.");
+							break;
+						}
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_krnHDDDriver.create(args[0]);
+							_StdOut.putText("Created file "+args[0]);
+						}
+						else {
+							_StdOut.putText("File "+args[0]+" already exists.");
+							this.krnFileIO(1, [args[0]+"(1)"]);
+						}
+						break;
+						
+					case 2: // Write
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
+							break;
+						}
+						_krnHDDDriver.writePlain(args[0], args[1]);
+						_StdOut.putText("Wrote to file "+args[0]+".");
+						break;
+					case 3: // View/Read
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
+							break;
+						}
+						_StdOut.putText(_krnHDDDriver.readPlain(args[0]));
+						break;
+						
+					case 4: // List
+						_krnHDDDriver.list(parseInt(args[0]));
+						break;
+						
+					case 5: // Delete
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_StdOut.putText("File not found. Please create " + args[0] + " or enter a valid filename.");
+							break;
+						}
+						_krnHDDDriver.deleteFile(args[0]);
+						_StdOut.putText("File "+args[0]+" deleted.");
+						break;
+						
+					case 6: // Create with no console message
+						if(args[0].length>(HDD_BLOCK_SIZE-4)) {
+							break;
+						}
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_krnHDDDriver.create(args[0]);
+						}
+						else {
+							this.krnFileIO(1, [args[0]+"(1)"]);
+						}
+						break;
+						
+					case 7: // Write without translating the message to hex
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							break;
+						}
+						_krnHDDDriver.write(args[0], args[1]);
+						break;
+						
+					case 8: // Read/View file without translation (view the hex)
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							break;
+						}
+						return _krnHDDDriver.read(args[0]);
+						break;
+						
+					case 9: // Delete file without console message
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							break;
+						}
+						_krnHDDDriver.deleteFile(args[0]);
+						break;
+						
+					case 10: // Find file
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							return false;
+							break;
+						}
+						return true;
+						break;
+						
+					case 11: // Check if file can fit on the disk
+						if(_krnHDDDriver.canFit(args[0])) {
+							return true;
+						}
+						return false;
+						break;
+						
+					case 12: // Rename
+						if(_krnHDDDriver.findFile(args[0]) != "-1") {
+							if(args[1].length>(HDD_BLOCK_SIZE-4)) {
+								_StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE-4) + " characters or less.");
+								break;
+							}
+							else {
+								_krnHDDDriver.rename(args[0], args[1]);
+								_StdOut.putText("File "+args[0]+" renamed to "+args[1]+".");
+								break;
+							}
+						}
+						_StdOut.putText("File "+args[0]+" not found.");
+						break;
+						
+					case 13: // Copy
+						if((args[0].length+3)>(HDD_BLOCK_SIZE-4)) {
+							_StdOut.putText("Filename too large or too many copies. Please use " + (HDD_BLOCK_SIZE-4) + " characters or less.");
+							break;
+						}
+						if(_krnHDDDriver.findFile(args[0]) == "-1") {
+							_StdOut.putText("File "+args[0]+" not found.");
+							break;
+						}
+						else {
+							if(_krnHDDDriver.findFile(args[0]+"(1)") == "-1") {
+								_krnHDDDriver.copy(args[0]);
+								_StdOut.putText("File " + args[0] + " copied as " + args[0] + "(1).");
+							}
+							else{
+								this.krnFileIO(13, [args[0]+"(1)"]);
+							}
+						}
+						break;
+						
+					default: // If the code is not 0-13, throw an error.
+						this.krnTrapError("Invalid File I/O operation. Mode = " + mode);
+				}
+			}
+			Control.updateDiskDisplay();
+		}
 
         public krnTrapError(msg) {
             Control.hostLog("OS ERROR - TRAP: " + msg);
@@ -228,10 +388,16 @@ module TSOS {
 		public krnDispatchNewProcess(pid) {
 			if(pid!=-1) { // If the PID the scheduler returned was -1, then all processes are completed and we should not attempt to context switch or begin a process.
 				_Kernel.krnTrace("Switching processes"); // Inform the user.
+				
 				if(_CurrentProcess>=0) { // Save the old data and change the process state, but only if we were already executing a process before.
 					_ProcessList[_CurrentProcess].save();
 					_ProcessList[_CurrentProcess].State = "ready";
 				}
+				
+				if(_ProcessList[pid].Segment == -1) { // If the new process is not in memory yet,
+					_Scheduler.rollProcess(_CurrentProcess, pid); // Roll out the last process and roll in the new one.
+				}
+				
 				_CurrentProcess = pid; // Make sure the current process is equal to whatever the scheduler wants it to be,
 				_ProcessList[_CurrentProcess].State = "running"; // and that its state is running.
 				

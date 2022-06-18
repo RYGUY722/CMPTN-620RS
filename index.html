@@ -19,11 +19,13 @@
    <script type="text/javascript" src="distrib/host/memoryAccessor.js"></script>
 
    <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
+   <script type="text/javascript" src="distrib/os/assembler.js"></script>
    <script type="text/javascript" src="distrib/os/interrupt.js"></script>
    <script type="text/javascript" src="distrib/os/canvastext.js"></script>
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
+   <script type="text/javascript" src="distrib/os/deviceDriverHardDisk.js"></script>
    <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
    <script type="text/javascript" src="distrib/os/processControlBlock.js"></script>
    <script type="text/javascript" src="distrib/os/queue.js"></script>
@@ -36,7 +38,7 @@
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip3.js"></script>
+   <!-- <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip4.js"></script> -->
    
 </head>
 
@@ -55,6 +57,7 @@
 		</div>
 	</div>
 
+	<center>
    <div id="divButtonBar" style="margin:4px;">
       <input type="button"
              id = "btnStartOS"
@@ -101,7 +104,7 @@
              onclick="TSOS.Control.hostBtnStep_click(this);">
    </div>
    
-   <div id="divTrackers" style="float:left;">
+   <div id="divTrackers" style="float:left; margin:10px;">
       <div id="divMemoryTracker">
       <label>
          Memory Tracker
@@ -111,6 +114,7 @@
          </table>
       </label>
    </div>
+   <br>
    
    <div id="divCPUInfo">
       <label>
@@ -142,6 +146,7 @@
          </table>
       </label>
    </div>
+   <br>
    
    <input type="button"
              id = "btnProcessView"
@@ -166,6 +171,7 @@
                   <th>Yreg</th>
                   <th>Zflag</th>
 				  <th>State</th>
+				  <th>Location</th>
 				  <th>Done</th>
                </tr>
             </thead>
@@ -189,6 +195,7 @@
                   <th>Yreg</th>
                   <th>Zflag</th>
 				  <th>State</th>
+				  <th>Location</th>
 				  <th>Done</th>
                </tr>
             </thead>
@@ -199,16 +206,8 @@
    </div>
    </div>
 
-   <div id="divConsole" style="margin:10px; width:500px; height:500px; float:left;">
-      <canvas id="display"
-              width="500px"
-              height="500px"
-              tabindex="3">
-      </canvas>
-   </div>
-
-<div id="divLogIn">
-   <div id="divLog" style="margin-left:890px;">
+<div id="divLogIn" style="float:right;">
+   <div id="divLog">
       <label>
          Host Log
          <br>
@@ -220,7 +219,7 @@
       </label>
    </div>
 
-   <div id="divUserProgramInput" style="margin-left:890px;">
+   <div id="divUserProgramInput">
       <label>
          User Program Input
          <br>
@@ -232,14 +231,34 @@
       </label>
    </div>
    </div>
+
+   <div id="divConsole" style="margin:10px; width:500px; height:500px; float:none; clear:none;">
+      <canvas id="display"
+              width="500px"
+              height="500px"
+              tabindex="3">
+      </canvas>
+   </div>
+   
+   <div id="divDisk" style="float:left;">
+		<label>
+         Hard Disk Contents
+         <br>
+         <table id="tbStorage" style="width:800px">
+            <tbody></tbody>
+         </table>
+      </label>
+   </div>
 </div>
 
-<p class="footerText" style="clear:both;">
+</center>
+
+<p class="footerText" style="clear:both;color:white;">
    <br>
    Copyright &copy; 2008 - 2019 No Rights Reserved.
    <br>
    Reproduction is inhibited without the express written consent of
-   Ted Codd, Stevie Ray Vaughan, and Ian Fleming.
+   Ted Codd, Stevie Ray Vaughan, Ian Fleming, and Satoru Iwata.
 </p>
 
 </body>

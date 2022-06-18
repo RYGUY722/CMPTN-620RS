@@ -59,6 +59,10 @@ var TSOS;
         // Host Events
         //
         static hostBtnStartOS_click(btn) {
+            // Do a fancy animation, because we're cool...
+            document.body.style.background = "#000011 url(distrib/images/core_background.png) no-repeat fixed center";
+            document.getElementById("display").style.backgroundColor = "rgba(202,232,117,.5)";
+            document.getElementById("display").style.border = "2px solid red";
             // Disable the (passed-in) start button...
             btn.disabled = true;
             // .. enable the Halt and Reset buttons ...
@@ -86,8 +90,6 @@ var TSOS;
             Control.hostLog("Attempting Kernel shutdown.", "host");
             // Call the OS shutdown routine.
             _Kernel.krnShutdown();
-            // Stop the interval that's simulating our clock pulse.
-            clearInterval(_hardwareClockID);
             // TODO: Is there anything else we need to do here?
         }
         static hostBtnReset_click(btn) {
@@ -107,6 +109,7 @@ var TSOS;
                 document.getElementById("btnStep").disabled = false;
                 // And display that we are now in Single-Step Mode.
                 document.getElementById("btnModeChange").value = "Mode: Single-Step";
+                document.getElementById("btnStep").focus();
             }
             else { //Otherwise, we need to switch back to normal mode.
                 Control.hostLog("Switching to Normal Mode", "host");
@@ -154,9 +157,11 @@ var TSOS;
                 while (addrstr.length < 3) { // To make it look good, I want all addresses to be the same size. I didn't want to do all that in a single line, this is clearer.
                     addrstr = "0" + addrstr;
                 }
-                row.insertCell(-1).innerHTML = (Math.floor(i / MEM_SEGMENT_SIZE) + "x" + addrstr);
+                var th = document.createElement('th'); // I switched this to a th to bold the address.
+                th.innerHTML = (Math.floor(i / MEM_SEGMENT_SIZE) + "x" + addrstr);
+                row.appendChild(th);
                 for (var c = 0; c < 8; c++) {
-                    var memval = _MemoryAccessor.read(i + c);
+                    var memval = _MemoryAccessor.readDirect(i + c);
                     memval = memval.toString();
                     row.insertCell(-1).innerHTML = memval.toUpperCase();
                 }
@@ -165,10 +170,10 @@ var TSOS;
         }
         static updateCPUStatus() {
             var table = document.getElementById("tbCPU");
-            var row = table.rows[1];
+            var row = table.rows[1]; // The CPU Status table only has a header row and an info row.
             row.cells[0].innerHTML = _CPU.isExecuting.toString();
             row.cells[1].innerHTML = _CPU.PC.toString(16).toUpperCase();
-            row.cells[2].innerHTML = _MemoryAccessor.read(_CPU.PC);
+            row.cells[2].innerHTML = _MemoryAccessor.readDirect(_CPU.PC);
             row.cells[3].innerHTML = _CPU.Acc.toString(16).toUpperCase();
             row.cells[4].innerHTML = _CPU.Xreg.toString(16).toUpperCase();
             row.cells[5].innerHTML = _CPU.Yreg.toString(16).toUpperCase();
@@ -178,11 +183,11 @@ var TSOS;
             var table = document.getElementById("tbPCB");
             while (_ProcessCounter >= table.rows.length) {
                 var newrow = table.insertRow(-1);
-                for (var i = 0; i < 8; i++) {
+                for (var i = 0; i < 9; i++) {
                     newrow.insertCell(-1);
                 }
             }
-            for (var i = 0; i < _ProcessCounter; i++) {
+            for (var i = 0; i < _ProcessCounter; i++) { // For every item in the Process List, print a row of the table.
                 var row = table.rows[(i + 1)];
                 row.cells[0].innerHTML = _ProcessList[i].PID.toString();
                 row.cells[1].innerHTML = _ProcessList[i].PC.toString(16).toUpperCase();
@@ -191,7 +196,14 @@ var TSOS;
                 row.cells[4].innerHTML = _ProcessList[i].Yreg.toString(16).toUpperCase();
                 row.cells[5].innerHTML = _ProcessList[i].Zflag.toString();
                 row.cells[6].innerHTML = _ProcessList[i].State.toString();
-                row.cells[7].innerHTML = _ProcessList[i].completed.toString();
+                row.cells[7].innerHTML = _ProcessList[i].Location.toString();
+                row.cells[8].innerHTML = _ProcessList[i].completed.toString();
+                if (i == _CurrentProcess) {
+                    row.style.backgroundColor = "yellow";
+                }
+                else {
+                    row.style.backgroundColor = "transparent";
+                }
             }
         }
         static updateReadyDisplay() {
@@ -205,11 +217,11 @@ var TSOS;
             } // There was an error where qArr was getting 1 index set to just "" which caused the lower for loop to blow up.
             while (qArr.length - 1 >= new_tbody.rows.length) {
                 var newrow = new_tbody.insertRow(-1);
-                for (var i = 0; i < 8; i++) {
+                for (var i = 0; i < 9; i++) {
                     newrow.insertCell(-1);
                 }
             }
-            for (var i = 0; i < qArr.length; i++) {
+            for (var i = 0; i < qArr.length; i++) { // For everything in the Ready Display, place a row into the table
                 var row = new_tbody.rows[i];
                 row.cells[0].innerHTML = _ProcessList[parseInt(qArr[i], 10)].PID.toString();
                 row.cells[1].innerHTML = _ProcessList[parseInt(qArr[i], 10)].PC.toString(16).toUpperCase();
@@ -218,11 +230,12 @@ var TSOS;
                 row.cells[4].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Yreg.toString(16).toUpperCase();
                 row.cells[5].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Zflag.toString();
                 row.cells[6].innerHTML = _ProcessList[parseInt(qArr[i], 10)].State.toString();
-                row.cells[7].innerHTML = _ProcessList[parseInt(qArr[i], 10)].completed.toString();
+                row.cells[7].innerHTML = _ProcessList[parseInt(qArr[i], 10)].Location.toString();
+                row.cells[8].innerHTML = _ProcessList[parseInt(qArr[i], 10)].completed.toString();
             }
-            if (_CurrentProcess >= 0) {
-                var row = new_tbody.insertRow(-1);
-                for (var i = 0; i < 8; i++) {
+            if (_CurrentProcess >= 0) { // If there's a currently running process, put that in too.
+                var row = new_tbody.insertRow(0);
+                for (var i = 0; i < 9; i++) {
                     row.insertCell(-1);
                 }
                 row.cells[0].innerHTML = _ProcessList[_CurrentProcess].PID.toString();
@@ -232,9 +245,52 @@ var TSOS;
                 row.cells[4].innerHTML = _ProcessList[_CurrentProcess].Yreg.toString(16).toUpperCase();
                 row.cells[5].innerHTML = _ProcessList[_CurrentProcess].Zflag.toString();
                 row.cells[6].innerHTML = _ProcessList[_CurrentProcess].State.toString();
-                row.cells[7].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
+                row.cells[7].innerHTML = _ProcessList[_CurrentProcess].Location.toString();
+                row.cells[8].innerHTML = _ProcessList[_CurrentProcess].completed.toString();
+                row.style.backgroundColor = "yellow";
             }
             table.replaceChild(new_tbody, table.tBodies[0]);
+        }
+        static updateDiskDisplay() {
+            var table = document.getElementById("tbStorage");
+            var newtab = document.createElement('tbody');
+            for (let x = 0; x < HDD_TRACKS; x++) {
+                for (let y = 0; y < HDD_SECTORS; y++) {
+                    for (let z = 0; z < HDD_BLOCKS; z++) { // For each block,
+                        var row = newtab.insertRow(-1); // Create a cell for the location
+                        var th = document.createElement('th');
+                        th.innerHTML = x + "," + y + "," + z;
+                        row.appendChild(th);
+                        var data = sessionStorage.getItem(x + "" + y + "" + z); // Create and format a cell for the "In Use" byte
+                        var cell = row.insertCell(-1);
+                        if (data.substr(0, 1).toUpperCase() == "0") {
+                            cell.innerHTML = "Not In Use";
+                            cell.style.color = "red";
+                        }
+                        else {
+                            cell.innerHTML = "In Use";
+                            cell.style.color = "green";
+                        }
+                        row.appendChild(cell);
+                        cell = row.insertCell(-1); // Create and format a cell for the link location
+                        var datalink = data.substr(1, 3).toUpperCase();
+                        if (datalink == "000") {
+                            cell.innerHTML = "No Link";
+                            cell.style.color = "red";
+                        }
+                        else {
+                            datalink = datalink.charAt(0) + "," + datalink.charAt(1) + "," + datalink.charAt(2);
+                            cell.innerHTML = datalink;
+                        }
+                        row.appendChild(cell);
+                        var scrolldiv = document.createElement('div'); // Format the data in a scrollable div
+                        scrolldiv.className = "scrollable";
+                        scrolldiv.innerHTML = data.substring(4).toUpperCase();
+                        row.insertCell(-1).appendChild(scrolldiv);
+                    }
+                }
+            }
+            table.replaceChild(newtab, table.tBodies[0]);
         }
     }
     TSOS.Control = Control;

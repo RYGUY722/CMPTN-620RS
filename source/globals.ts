@@ -21,6 +21,11 @@ const MEM_SEGMENT_SIZE: number = 256; // The size of a memory segment code is al
 const MEM_SEGMENTS: number = 3; // Please place the number of desired memory segments as the number within this constant.
 const MEM_MAXIMUM_SIZE: number = MEM_SEGMENT_SIZE*MEM_SEGMENTS; // The full memory size
 
+const HDD_TRACKS: number = 3; // These define the size of the Disk.
+const HDD_SECTORS: number = 7;
+const HDD_BLOCKS: number = 7;
+const HDD_BLOCK_SIZE: number = 64;
+
 const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
@@ -42,10 +47,13 @@ var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager:any=null;
 
 var _Scheduler:any=null;
+var _ProgramLanguage: string = "mc"; // Available languages: "mc" = Machine Code (normal), "asm" = Assembly
 
 var _OSclock: number = 0;  // Page 23.
 
 var _Mode: number = 0;     // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
+
+var _HDDReady: boolean = false;
 
 var _Canvas: HTMLCanvasElement;          // Initialized in Control.hostInit().
 var _DrawingContext: any;                // = _Canvas.getContext("2d");  // Assigned here for type safety, but re-initialized in Control.hostInit() for OCD and logic.
@@ -67,6 +75,7 @@ var _CurrentProcess: number = -1;
 var _ProcessList: TSOS.ProcessControlBlock[] = new Array();
 var _ResidentList: number[] = new Array(MEM_SEGMENTS);
 var _ReadyList: TSOS.Queue = null;
+var _LoadedList: number[] = new Array();
 
 // Standard input and output
 var _StdIn:  TSOS.Console = null; 
@@ -81,6 +90,7 @@ var _SarcasticMode: boolean = false;
 
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
+var _krnHDDDriver: TSOS.DeviceDriverHardDisk  = null;
 
 var _hardwareClockID: number = null;
 

@@ -36,6 +36,19 @@ module TSOS {
             }
             return retVal;
         }
+		
+		public prioritySort(l, r) { // This sorts the queue by a priority in the _ProcessList. Only meant to be used by the _ReadyList
+			var index;
+			if (this.q.length > 1) {
+				index = this.partition(l, r);
+				if (l < index - 1) {
+					this.prioritySort(l, index - 1);
+				}
+				if (index < r) {
+					this.prioritySort(index, r);
+				}
+			}
+		}
 
         public toString() {
             var retVal = "";
@@ -44,5 +57,33 @@ module TSOS {
             }
             return retVal;
         }
+		
+		private swap(l, r){ // Perhaps this shouldn't be here, but this is quicksort code, repurposed into my prioritysort.
+			var temp = this.q[l];
+			this.q[l] = this.q[r];
+			this.q[r] = temp;
+		}
+		
+		private partition(l, r) {
+			var pivot = _ProcessList[this.q[Math.floor((r + l) / 2)]].priority;
+			var i = l;
+			var j = r;
+			
+			while (i <= j) {
+				while (_ProcessList[this.q[i]].priority < pivot) {
+					i++;
+				}
+				while (_ProcessList[this.q[j]].priority > pivot) {
+					j--;
+				}
+				if (i <= j) {
+					this.swap(i, j);
+					i++;
+					j--;
+				}
+			}
+			
+			return i;
+		}
     }
 }

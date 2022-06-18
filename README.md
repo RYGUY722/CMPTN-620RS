@@ -10,7 +10,7 @@ Each project has its own branch. After the project's completion, the changes are
 All lab questions can be found in the "questions" folder.  
   
 **Project 1 branch:** Project1. 	Project 1 is done!  
-**Project 2 branch:** Project2.	  Project 2 is done!    
+**Project 2 branch:** Project2.	  Project 2 is done!
 **Project 3 branch:** Project3.	  Project 3 is done!    
 **Project 4 branch:** Project4.	  Project 4 is done!    
 
